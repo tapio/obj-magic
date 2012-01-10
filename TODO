@@ -1,0 +1,31 @@
+TODO
+====
+
+General:
+
+--info
+--out FILE
+--clean (deletes unreferenced coords adjusting indices)
+
+Operations on vertices:
+
+--translate[xyz]
+--rotate[xyz]
+--scale[xyz]
+--scale-absolute[xyz]
+
+Normals:
+
+--smooth-normals
+--flat-normals
+--normalize-normals
+
+Faces:
+
+--triangulate
+
+Groups:
+
+--delete-material MTL
+--delete-group GRP
+--delete-object OBJ
