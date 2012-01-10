@@ -7,6 +7,8 @@
 
 #include "args.hpp"
 
+#define VERSION "0.2"
+
 enum Commands {
 	NONE = 0,
 	SCALE = 1,
@@ -17,11 +19,24 @@ enum Commands {
 
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
-	if (args.opt('h', "help") || argc < 3) {
-		std::cerr << "Usage:    " << args.app() << " COMMAND [PARAMS] FILE" << std::endl;
-		std::cerr << "Example:  " << args.app() << " --scale 0.5 model.obj" << std::endl;
-		return EXIT_FAILURE;
+	if (args.opt('v', "version")) {
+		std::cerr << VERSION << std::endl;
+		return EXIT_SUCCESS;
 	}
+	if (args.opt('h', "help") || argc < 3) {
+		std::cerr << "Usage: " << args.app() << " PARAM [PARAM...] FILE" << std::endl;
+		std::cerr << "Parameters:" << std::endl;
+		std::cerr << " -h   --help            print this help and exit" << std::endl;
+		std::cerr << " -v   --version         print version and exit" << std::endl;
+		std::cerr << " -s   --scale SCALE     scale object along all axes SCALE amount" << std::endl;
+		std::cerr << " -c   --center          center object along all axes" << std::endl;
+		std::cerr << "      --centerx         center object x axis" << std::endl;
+		std::cerr << "      --centery         center object y axis" << std::endl;
+		std::cerr << "      --centerz         center object z axis" << std::endl;
+		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
+		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
+	}
+
 	int mode = NONE;
 
 	float scale = args.arg('s', "scale", -1.0f);
