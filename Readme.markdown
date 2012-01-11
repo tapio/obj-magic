@@ -49,12 +49,6 @@ If it doesn't work for you, just compile all .cpp files in the root directory in
 	* --> Results in quick operation and very low memory usage
 
 
-## Known Issues ##
-
-* Poorly tested, no test suite. This thing is under development, so improvements are coming
-* Does not care about separate objects in one .obj file
-
-
 ## License ##
 
      Copyright (C) 2012  Tapio Vierros
