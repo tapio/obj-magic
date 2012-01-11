@@ -63,6 +63,8 @@ public:
 		return default_arg;
 	}
 
+	const std::set<std::string>& orphans() const { return globalopts; }
+
 	std::string app() const { return app_name; }
 
 private:
