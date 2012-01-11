@@ -9,13 +9,11 @@ General:
 FILE [FILE...]
 GUI frontend?
 separate object ("o") support
-don't run analyzing pass if not needed
+test suite
 
 Operations on vertices:
 
---translate[xyz]
 --rotate[xyz]
---scale[xyz]
 --scale-absolute[xyz]
 
 Normals:
