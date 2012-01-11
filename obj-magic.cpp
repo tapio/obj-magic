@@ -12,23 +12,6 @@
 
 using namespace glm;
 
-enum Commands {
-	NONE = 0,
-	SCALE = 1,
-	CENTERX = 2,
-	CENTERY = 4,
-	CENTERZ = 8,
-	CENTERALL = CENTERX | CENTERY | CENTERZ,
-	MIRRORX = 16,
-	MIRRORY = 32,
-	MIRRORZ = 64,
-	MIRRORALL = MIRRORX | MIRRORY | MIRRORZ,
-	TRANSLATEX = 128,
-	TRANSLATEY = 256,
-	TRANSLATEZ = 512,
-	TRANSLATEALL = TRANSLATEX | TRANSLATEY | TRANSLATEZ
-};
-
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
 	if (args.opt('v', "version")) {
@@ -57,28 +40,24 @@ int main(int argc, char* argv[]) {
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
-	int mode = NONE;
-
 	float scale = args.arg('s', "scale", -1.0f);
-	if (scale > 0.0f) mode |= SCALE;
 
-	float t = args.arg(' ', "translate", 0.0f);
-	vec3 translate(t);
-	if (t != 0.0f) mode |= TRANSLATEALL;
-	t = args.arg(' ', "translate", 0.0f);
-	if ((t = args.arg(' ', "translatex", 0.0f)) != 0.0f) { mode |= TRANSLATEX; translate.x += t; }
-	if ((t = args.arg(' ', "translatey", 0.0f)) != 0.0f) { mode |= TRANSLATEY; translate.y += t; }
-	if ((t = args.arg(' ', "translatez", 0.0f)) != 0.0f) { mode |= TRANSLATEZ; translate.z += t; }
+	vec3 translate(args.arg(' ', "translate", 0.0f));
+	translate.x += args.arg(' ', "translatex", 0.0f);
+	translate.y += args.arg(' ', "translatey", 0.0f);
+	translate.z += args.arg(' ', "translatez", 0.0f);
 
-	if (args.opt('c', "center"))  mode |= CENTERALL;
-	if (args.opt(' ', "centerx")) mode |= CENTERX;
-	if (args.opt(' ', "centery")) mode |= CENTERY;
-	if (args.opt(' ', "centerz")) mode |= CENTERZ;
+	ivec3 center;
+	if (args.opt('c', "center"))  center = ivec3(1);
+	if (args.opt(' ', "centerx")) center.x = 1;
+	if (args.opt(' ', "centery")) center.y = 1;
+	if (args.opt(' ', "centerz")) center.z = 1;
 
-	if (args.opt(' ', "mirror"))  mode |= MIRRORALL;
-	if (args.opt(' ', "mirrorx")) mode |= MIRRORX;
-	if (args.opt(' ', "mirrory")) mode |= MIRRORY;
-	if (args.opt(' ', "mirrorz")) mode |= MIRRORZ;
+	ivec3 mirror;
+	if (args.opt(' ', "mirror"))  mirror = ivec3(1);
+	if (args.opt(' ', "mirrorx")) mirror.x = 1;
+	if (args.opt(' ', "mirrory")) mirror.y = 1;
+	if (args.opt(' ', "mirrorz")) mirror.z = 1;
 
 	std::string filename = argv[argc-1];
 	std::ifstream file(filename.c_str(), std::ios::binary);
@@ -101,7 +80,7 @@ int main(int argc, char* argv[]) {
 			ubound = max(in, ubound);
 		}
 	}
-	vec3 center = (lbound + ubound) * 0.5f;
+	center *= (lbound + ubound) * 0.5f;
 
 	// Output pass
 	file.clear();
@@ -112,14 +91,10 @@ int main(int argc, char* argv[]) {
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> in.x >> in.y >> in.z;
-			if (mode & CENTERX) in.x -= center.x;
-			if (mode & CENTERY) in.y -= center.y;
-			if (mode & CENTERZ) in.z -= center.z;
-			if (mode & MIRRORX) in.x = -in.x;
-			if (mode & MIRRORY) in.y = -in.y;
-			if (mode & MIRRORZ) in.z = -in.z;
-			if (mode & SCALE) in *= scale;
-			if (mode & TRANSLATEALL) in += translate;
+			if (center.length() > 0.0f) in -= center;
+			if (mirror.length() > 0.0f) in *= mirror;
+			if (scale > 0.0f) in *= scale;
+			if (translate.length() > 0.0f) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
 			std::cout << row << std::endl;
