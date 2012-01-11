@@ -14,6 +14,7 @@ Non-exhaustive list of features include:
 * More to come
 
 Most transformations can be done do each axis x/y/z separately or together.
+Doing multiple different operations at the same time is also possible.
 
 
 ## Usage ##
@@ -37,13 +38,13 @@ Run:
 
 ## Design Goals ##
 
-* Don't modify lines unless necessary
+* Doesn't modify lines unless necessary
 	* Version control system friendliness
 	* Preserving normals seems to be hard with most 3d modelling softwares
 * Effiency
-	* No intermediate form
-	* Manu operations can be done in one simple pass
-	* --> Results in quick operation and very low memeory usage
+	* No intermediate form, no unnecessary parsing
+	* Many operations can be done in one simple pass
+	* --> Results in quick operation and very low memory usage
 
 
 ## License ##
