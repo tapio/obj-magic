@@ -1,31 +1,33 @@
 TODO
 ====
 
+Milestones: {v1.0} {v2.0} {v3.0}
+
 General:
 
---info
---out FILE
+--out FILE {v1.0}
 --clean (deletes unreferenced coords adjusting indices)
 FILE [FILE...]
-GUI frontend?
+GUI frontend? {v2.0}
 separate object ("o") support
-test suite
+test suite {v1.0}
 
 Operations on vertices:
 
---rotate[xyz]
---scale-absolute[xyz]
+--set-size[xyz] (max-min = size) {v1.0}
+--set-maximum[xyz] {v1.0}
 
 Normals:
 
 --auto-normals [THRESHOLD-ANGLE]
 --smooth-normals
 --flat-normals
---normalize-normals
+--normalize-normals {v1.0}
 
 Faces:
 
---triangulate
+--triangulate {v2.0}
+--smooth-tessellate {v3.0}
 
 Groups:
 

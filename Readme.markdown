@@ -35,6 +35,8 @@ Run:
 
 	./make.sh
 
+If it doesn't work for you, just compile all .cpp files in the root directory into an executable using your preferred method / compiler.
+
 
 ## Design Goals ##
 
@@ -45,6 +47,12 @@ Run:
 	* No intermediate form, no unnecessary parsing
 	* Many operations can be done in one simple pass
 	* --> Results in quick operation and very low memory usage
+
+
+## Known Issues ##
+
+* Poorly tested, no test suite. This thing is under development, so improvements are coming
+* Does not care about separate objects in one .obj file
 
 
 ## License ##
