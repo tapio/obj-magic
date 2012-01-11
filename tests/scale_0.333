@@ -2,7 +2,7 @@
 
 INFILE="$DATADIR/square.obj"
 OUTFILE="$TEMPDIR/scale.obj"
-REFFILE="$DATADIR/square-scale.obj"
+REFFILE="$DATADIR/square-scale_0.333.obj"
 
 $BIN --scale 0.333 "$INFILE" > "$OUTFILE"
 
