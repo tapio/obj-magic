@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
 	translate.y += args.arg(' ', "translatey", 0.0f);
 	translate.z += args.arg(' ', "translatez", 0.0f);
 
-	ivec3 center;
-	if (args.opt('c', "center"))  center = ivec3(1);
+	vec3 center;
+	if (args.opt('c', "center"))  center = vec3(1);
 	if (args.opt(' ', "centerx")) center.x = 1;
 	if (args.opt(' ', "centery")) center.y = 1;
 	if (args.opt(' ', "centerz")) center.z = 1;
