@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include <limits>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "../glm/glm.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
 #include "args.hpp"
 
 #define APPNAME "obj-magic"
