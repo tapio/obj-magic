@@ -22,7 +22,6 @@ Normals:
 --auto-normals [THRESHOLD-ANGLE]
 --smooth-normals
 --flat-normals
---normalize-normals {v1.0}
 
 Faces:
 

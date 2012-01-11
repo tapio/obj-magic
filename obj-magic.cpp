@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << " -h   --help               print this help and exit" << std::endl;
 		std::cerr << " -v   --version            print version and exit" << std::endl;
 		std::cerr << " -i   --info               print info about the object and exit" << std::endl;
+		std::cerr << " -n   --normalize-normals  renormalize all normals" << std::endl;
 		std::cerr << " -s   --scale SCALE        scale object along all axes SCALE amount" << std::endl;
 		std::cerr << "      --scalex SCALE       scale object along x axis SCALE amount" << std::endl;
 		std::cerr << "      --scaley SCALE       scale object along y axis SCALE amount" << std::endl;
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	bool info = args.opt('i', "info");
+	bool normalize_normals = args.opt('n', "normalize-normals");
 
 	vec3 scale(args.arg('s', "scale", 1.0f));
 	scale.x *= args.arg(' ', "scalex", 1.0f);
@@ -152,6 +154,10 @@ int main(int argc, char* argv[]) {
 			if (rotangles.length() > 0.0f) in = rotation * in;
 			if (translate.length() > 0.0f) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+		} else if (row.substr(0,3) == "vn ") {  // Normals
+			srow >> tempst >> in.x >> in.y >> in.z;
+			if (normalize_normals) normalize(in);
+			std::cout << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
 			std::cout << row << std::endl;
 		}
