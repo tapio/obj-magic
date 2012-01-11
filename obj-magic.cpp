@@ -5,9 +5,12 @@
 #include <cstdlib>
 #include <limits>
 
+#include "glm/glm.hpp"
 #include "args.hpp"
 
 #define VERSION "0.2"
+
+using namespace glm;
 
 enum Commands {
 	NONE = 0,
@@ -55,44 +58,34 @@ int main(int argc, char* argv[]) {
 
 	std::string row;
 	// Analyzing pass
-	float xmin = std::numeric_limits<float>::max();
-	float xmax = -std::numeric_limits<float>::max();
-	float ymin = std::numeric_limits<float>::max();
-	float ymax = -std::numeric_limits<float>::max();
-	float zmin = std::numeric_limits<float>::max();
-	float zmax = -std::numeric_limits<float>::max();
+	vec3 lbound(std::numeric_limits<float>::max());
+	vec3 ubound(-std::numeric_limits<float>::max());
 	while (getline(file, row)) {
 		std::istringstream srow(row);
-		float x,y,z;
+		vec3 in;
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
-			srow >> tempst >> x >> y >> z;
-			xmin = std::min(x, xmin);
-			ymin = std::min(y, ymin);
-			zmin = std::min(z, zmin);
-			xmax = std::max(x, xmax);
-			ymax = std::max(y, ymax);
-			zmax = std::max(z, zmax);
+			srow >> tempst >> in.x >> in.y >> in.z;
+			lbound = min(in, lbound);
+			ubound = max(in, ubound);
 		}
 	}
-	float cx = (xmin + xmax) * 0.5;
-	float cy = (ymin + ymax) * 0.5;
-	float cz = (zmin + zmax) * 0.5;
+	vec3 center = (lbound + ubound) * 0.5f;
 
 	// Output pass
 	file.clear();
 	file.seekg(0, std::ios::beg);
 	while (getline(file, row)) {
 		std::istringstream srow(row);
-		float x,y,z;
+		vec3 in;
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
-			srow >> tempst >> x >> y >> z;
-			if (mode & CENTERX) x -= cx;
-			if (mode & CENTERY) y -= cy;
-			if (mode & CENTERZ) z -= cz;
-			if (mode & SCALE) { x *= scale; y *= scale; z *= scale; }
-			std::cout << "v " << x << " " << y << " " << z << std::endl;
+			srow >> tempst >> in.x >> in.y >> in.z;
+			if (mode & CENTERX) in.x -= center.x;
+			if (mode & CENTERY) in.y -= center.y;
+			if (mode & CENTERZ) in.z -= center.z;
+			if (mode & SCALE) in *= scale;
+			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
 			std::cout << row << std::endl;
 		}
