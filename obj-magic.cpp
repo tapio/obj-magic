@@ -74,19 +74,22 @@ int main(int argc, char* argv[]) {
 
 	std::string row;
 	// Analyzing pass
-	vec3 lbound(std::numeric_limits<float>::max());
-	vec3 ubound(-std::numeric_limits<float>::max());
-	while (getline(file, row)) {
-		std::istringstream srow(row);
-		vec3 in;
-		std::string tempst;
-		if (row.substr(0,2) == "v ") {  // Vertices
-			srow >> tempst >> in.x >> in.y >> in.z;
-			lbound = min(in, lbound);
-			ubound = max(in, ubound);
+	bool analyze = center.length() > 0.0f;
+	if (analyze) {
+		vec3 lbound(std::numeric_limits<float>::max());
+		vec3 ubound(-std::numeric_limits<float>::max());
+		while (getline(file, row)) {
+			std::istringstream srow(row);
+			vec3 in;
+			std::string tempst;
+			if (row.substr(0,2) == "v ") {  // Vertices
+				srow >> tempst >> in.x >> in.y >> in.z;
+				lbound = min(in, lbound);
+				ubound = max(in, ubound);
+			}
 		}
+		center *= (lbound + ubound) * 0.5f;
 	}
-	center *= (lbound + ubound) * 0.5f;
 
 	// Output pass
 	file.clear();
