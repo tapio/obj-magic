@@ -17,7 +17,12 @@ enum Commands {
 	SCALE = 1,
 	CENTERX = 2,
 	CENTERY = 4,
-	CENTERZ = 8
+	CENTERZ = 8,
+	CENTERALL = CENTERX | CENTERY | CENTERZ,
+	MIRRORX = 16,
+	MIRRORY = 32,
+	MIRRORZ = 64,
+	MIRRORALL = MIRRORX | MIRRORY | MIRRORZ
 };
 
 int main(int argc, char* argv[]) {
@@ -36,6 +41,10 @@ int main(int argc, char* argv[]) {
 		std::cerr << "      --centerx         center object x axis" << std::endl;
 		std::cerr << "      --centery         center object y axis" << std::endl;
 		std::cerr << "      --centerz         center object z axis" << std::endl;
+		std::cerr << "      --mirror          mirror object along all axes" << std::endl;
+		std::cerr << "      --mirrorx         mirror object along x axis" << std::endl;
+		std::cerr << "      --mirrory         mirror object along y axis" << std::endl;
+		std::cerr << "      --mirrorz         mirror object along z axis" << std::endl;
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -44,10 +53,14 @@ int main(int argc, char* argv[]) {
 
 	float scale = args.arg('s', "scale", -1.0f);
 	if (scale > 0.0f) mode |= SCALE;
-	if (args.opt('c', "center")) mode |= CENTERX | CENTERY | CENTERZ;
+	if (args.opt('c', "center"))  mode |= CENTERALL;
 	if (args.opt(' ', "centerx")) mode |= CENTERX;
 	if (args.opt(' ', "centery")) mode |= CENTERY;
 	if (args.opt(' ', "centerz")) mode |= CENTERZ;
+	if (args.opt(' ', "mirror"))  mode |= MIRRORALL;
+	if (args.opt(' ', "mirrorx")) mode |= MIRRORX;
+	if (args.opt(' ', "mirrory")) mode |= MIRRORY;
+	if (args.opt(' ', "mirrorz")) mode |= MIRRORZ;
 
 	std::string filename = argv[argc-1];
 	std::ifstream file(filename.c_str(), std::ios::binary);
@@ -84,6 +97,9 @@ int main(int argc, char* argv[]) {
 			if (mode & CENTERX) in.x -= center.x;
 			if (mode & CENTERY) in.y -= center.y;
 			if (mode & CENTERZ) in.z -= center.z;
+			if (mode & MIRRORX) in.x = -in.x;
+			if (mode & MIRRORY) in.y = -in.y;
+			if (mode & MIRRORZ) in.z = -in.z;
 			if (mode & SCALE) in *= scale;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
