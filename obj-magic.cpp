@@ -22,7 +22,8 @@ std::string toString(vec3 vec) {
 	return oss.str();
 }
 
-template<typename T> inline bool isZero(T vec) { return dot(vec, vec) < EPSILON; }
+template<typename T> inline bool isZero(T v) { return dot(v,v) < EPSILON; }
+template<typename T> inline bool isOne(T v) { return isZero(v - T(1)); }
 
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
@@ -80,11 +81,11 @@ int main(int argc, char* argv[]) {
 	if (args.opt(' ', "centery")) center.y = 1;
 	if (args.opt(' ', "centerz")) center.z = 1;
 
-	ivec3 mirror;
-	if (args.opt(' ', "mirror"))  mirror = ivec3(1);
-	if (args.opt(' ', "mirrorx")) mirror.x = 1;
-	if (args.opt(' ', "mirrory")) mirror.y = 1;
-	if (args.opt(' ', "mirrorz")) mirror.z = 1;
+	ivec3 mirror(1);
+	if (args.opt(' ', "mirror"))  mirror = ivec3(-1);
+	if (args.opt(' ', "mirrorx")) mirror.x = -1;
+	if (args.opt(' ', "mirrory")) mirror.y = -1;
+	if (args.opt(' ', "mirrorz")) mirror.z = -1;
 
 	vec3 rotangles(args.arg(' ', "rotate", 0.0f));
 	rotangles.x += args.arg(' ', "rotatex", 0.0f);
@@ -153,8 +154,8 @@ int main(int argc, char* argv[]) {
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> in.x >> in.y >> in.z;
 			if (!isZero(center)) in -= center;
-			if (!isZero(mirror)) in *= mirror;
-			if (scale != vec3(1.0f)) in *= scale;
+			if (!isOne(mirror)) in *= mirror;
+			if (!isOne(scale)) in *= scale;
 			if (!isZero(rotangles)) in = rotation * in;
 			if (!isZero(translate)) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
