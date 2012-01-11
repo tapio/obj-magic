@@ -13,7 +13,7 @@ Non-exhaustive list of features include:
 * Etc...
 * More to come
 
-Most transformations can be done do each axis x/y/z separately or together.
+Most transformations can be done to each axis x/y/z separately or together.
 Doing multiple different operations at the same time is also possible.
 
 
