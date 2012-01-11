@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include "args.hpp"
 
 #define VERSION "0.2"
@@ -39,6 +40,10 @@ int main(int argc, char* argv[]) {
 		std::cerr << "      --translatex AMOUNT  translate along x axis AMOUNT amount" << std::endl;
 		std::cerr << "      --translatey AMOUNT  translate along y axis AMOUNT amount" << std::endl;
 		std::cerr << "      --translatez AMOUNT  translate along z axis AMOUNT amount" << std::endl;
+		std::cerr << "      --rotate AMOUNT      rotate along all axes AMOUNT degrees" << std::endl;
+		std::cerr << "      --rotatex AMOUNT     rotate along x axis AMOUNT degrees" << std::endl;
+		std::cerr << "      --rotatey AMOUNT     rotate along y axis AMOUNT degrees" << std::endl;
+		std::cerr << "      --rotatez AMOUNT     rotate along z axis AMOUNT degrees" << std::endl;
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -64,6 +69,16 @@ int main(int argc, char* argv[]) {
 	if (args.opt(' ', "mirrorx")) mirror.x = 1;
 	if (args.opt(' ', "mirrory")) mirror.y = 1;
 	if (args.opt(' ', "mirrorz")) mirror.z = 1;
+
+	vec3 rotangles(args.arg(' ', "rotate", 0.0f));
+	rotangles.x += args.arg(' ', "rotatex", 0.0f);
+	rotangles.y += args.arg(' ', "rotatey", 0.0f);
+	rotangles.z += args.arg(' ', "rotatez", 0.0f);
+	mat4 temprot(1.0f);
+	if (rotangles.x != 0.0f) temprot = rotate(temprot, rotangles.x, vec3(1,0,0));
+	if (rotangles.y != 0.0f) temprot = rotate(temprot, rotangles.y, vec3(0,1,0));
+	if (rotangles.z != 0.0f) temprot = rotate(temprot, rotangles.z, vec3(0,0,1));
+	mat3 rotation(temprot);
 
 	std::string filename = argv[argc-1];
 	std::ifstream file(filename.c_str(), std::ios::binary);
@@ -103,6 +118,7 @@ int main(int argc, char* argv[]) {
 			if (center.length() > 0.0f) in -= center;
 			if (mirror.length() > 0.0f) in *= mirror;
 			if (scale.length() != 1.0f) in *= scale;
+			if (rotangles.length() > 0.0f) in = rotation * in;
 			if (translate.length() > 0.0f) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
