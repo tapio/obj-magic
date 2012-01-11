@@ -24,6 +24,9 @@ int main(int argc, char* argv[]) {
 		std::cerr << " -h   --help               print this help and exit" << std::endl;
 		std::cerr << " -v   --version            print version and exit" << std::endl;
 		std::cerr << " -s   --scale SCALE        scale object along all axes SCALE amount" << std::endl;
+		std::cerr << "      --scalex SCALE       scale object along x axis SCALE amount" << std::endl;
+		std::cerr << "      --scaley SCALE       scale object along y axis SCALE amount" << std::endl;
+		std::cerr << "      --scalez SCALE       scale object along z axis SCALE amount" << std::endl;
 		std::cerr << " -c   --center             center object along all axes" << std::endl;
 		std::cerr << "      --centerx            center object x axis" << std::endl;
 		std::cerr << "      --centery            center object y axis" << std::endl;
@@ -40,7 +43,10 @@ int main(int argc, char* argv[]) {
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
-	float scale = args.arg('s', "scale", -1.0f);
+	vec3 scale(args.arg('s', "scale", 1.0f));
+	scale.x *= args.arg(' ', "scalex", 1.0f);
+	scale.y *= args.arg(' ', "scaley", 1.0f);
+	scale.z *= args.arg(' ', "scalez", 1.0f);
 
 	vec3 translate(args.arg(' ', "translate", 0.0f));
 	translate.x += args.arg(' ', "translatex", 0.0f);
@@ -93,7 +99,7 @@ int main(int argc, char* argv[]) {
 			srow >> tempst >> in.x >> in.y >> in.z;
 			if (center.length() > 0.0f) in -= center;
 			if (mirror.length() > 0.0f) in *= mirror;
-			if (scale > 0.0f) in *= scale;
+			if (scale.length() != 1.0f) in *= scale;
 			if (translate.length() > 0.0f) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
