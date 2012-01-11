@@ -22,7 +22,7 @@ std::string toString(vec3 vec) {
 	return oss.str();
 }
 
-template<typename T> inline bool isZero(T v) { return dot(v,v) < EPSILON; }
+template<typename T> inline bool isZero(T v) { v = abs(v); return v.x < EPSILON && v.y < EPSILON && v.z < EPSILON; }
 template<typename T> inline bool isOne(T v) { return isZero(v - T(1)); }
 
 int main(int argc, char* argv[]) {
