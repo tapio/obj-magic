@@ -12,6 +12,8 @@
 #define APPNAME "obj-magic"
 #define VERSION "v0.2"
 
+#define EPSILON 0.00001f
+
 using namespace glm;
 
 std::string toString(vec3 vec) {
@@ -19,6 +21,8 @@ std::string toString(vec3 vec) {
 	oss << "x:" << vec.x << " y:" << vec.y << " z:" << vec.z;
 	return oss.str();
 }
+
+template<typename T> inline bool isZero(T vec) { return dot(vec, vec) < EPSILON; }
 
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
@@ -148,11 +152,11 @@ int main(int argc, char* argv[]) {
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> in.x >> in.y >> in.z;
-			if (center.length() > 0.0f) in -= center;
-			if (mirror.length() > 0.0f) in *= mirror;
-			if (scale.length() != 1.0f) in *= scale;
-			if (rotangles.length() > 0.0f) in = rotation * in;
-			if (translate.length() > 0.0f) in += translate;
+			if (!isZero(center)) in -= center;
+			if (!isZero(mirror)) in *= mirror;
+			if (scale != vec3(1.0f)) in *= scale;
+			if (!isZero(rotangles)) in = rotation * in;
+			if (!isZero(translate)) in += translate;
 			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
