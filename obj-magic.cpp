@@ -9,14 +9,21 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "args.hpp"
 
-#define VERSION "0.2"
+#define APPNAME "obj-magic"
+#define VERSION "v0.2"
 
 using namespace glm;
+
+std::string toString(vec3 vec) {
+	std::ostringstream oss;
+	oss << "x:" << vec.x << " y:" << vec.y << " z:" << vec.z;
+	return oss.str();
+}
 
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
 	if (args.opt('v', "version")) {
-		std::cerr << VERSION << std::endl;
+		std::cerr << APPNAME << " " << VERSION << std::endl;
 		return EXIT_SUCCESS;
 	}
 	if (args.opt('h', "help") || argc < 3) {
@@ -24,6 +31,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Parameters:" << std::endl;
 		std::cerr << " -h   --help               print this help and exit" << std::endl;
 		std::cerr << " -v   --version            print version and exit" << std::endl;
+		std::cerr << " -i   --info               print info about the object and exit" << std::endl;
 		std::cerr << " -s   --scale SCALE        scale object along all axes SCALE amount" << std::endl;
 		std::cerr << "      --scalex SCALE       scale object along x axis SCALE amount" << std::endl;
 		std::cerr << "      --scaley SCALE       scale object along y axis SCALE amount" << std::endl;
@@ -47,6 +55,8 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
+
+	bool info = args.opt('i', "info");
 
 	vec3 scale(args.arg('s', "scale", 1.0f));
 	scale.x *= args.arg(' ', "scalex", 1.0f);
@@ -89,10 +99,11 @@ int main(int argc, char* argv[]) {
 
 	std::string row;
 	// Analyzing pass
-	bool analyze = center.length() > 0.0f;
+	bool analyze = info || (center.length() > 0.0f);
 	if (analyze) {
 		vec3 lbound(std::numeric_limits<float>::max());
 		vec3 ubound(-std::numeric_limits<float>::max());
+		unsigned long long v_count = 0, vt_count = 0, vn_count = 0, f_count = 0;
 		while (getline(file, row)) {
 			std::istringstream srow(row);
 			vec3 in;
@@ -101,9 +112,29 @@ int main(int argc, char* argv[]) {
 				srow >> tempst >> in.x >> in.y >> in.z;
 				lbound = min(in, lbound);
 				ubound = max(in, ubound);
+				++v_count;
 			}
+			else if (row.substr(0,3) == "vt ") ++vt_count;
+			else if (row.substr(0,3) == "vn ") ++vn_count;
+			else if (row.substr(0,2) == "f ") ++f_count;
 		}
 		center *= (lbound + ubound) * 0.5f;
+		// Output info?
+		if (info) {
+			std::cout << APPNAME << " " << VERSION << std::endl;
+			std::cout << "Filename: " << filename << std::endl;
+			std::cout << std::endl;
+			std::cout << "Vertices: " << v_count << std::endl;
+			std::cout << "TexCoords: " << vt_count << std::endl;
+			std::cout << "Normals: " << vn_count << std::endl;
+			std::cout << "Faces: " << f_count << std::endl;
+			std::cout << std::endl;
+			std::cout << "Center: " << toString((lbound + ubound) * 0.5f) << std::endl;
+			std::cout << "Size: " << toString(ubound - lbound) << std::endl;
+			std::cout << "Lower bounds: " << toString(lbound) << std::endl;
+			std::cout << "Upper bounds: " << toString(ubound) << std::endl;
+			return EXIT_SUCCESS;
+		}
 	}
 
 	// Output pass
