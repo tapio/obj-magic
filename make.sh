@@ -1,5 +1,6 @@
 #!/bin/sh
 
-EXE="obj-magic"
-CFLAGS="-O2"
-clang++ $CFLAGS *.cpp -o $EXE
+EXENAME="obj-magic"
+CXX=clang++
+CFLAGS="-O2 -Wall -Wextra -Wno-unused-parameter"
+$CXX $CFLAGS *.cpp -o $EXENAME
