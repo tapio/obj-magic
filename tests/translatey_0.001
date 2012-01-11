@@ -1,0 +1,11 @@
+#!/bin/bash
+
+INFILE="$DATADIR/square.obj"
+OUTFILE="$TEMPDIR/translatey.obj"
+REFFILE="$DATADIR/square-translatey_0.001.obj"
+
+$BIN --translatey 0.001 "$INFILE" > "$OUTFILE"
+
+cmp -s "$REFFILE" "$OUTFILE"
+exit $?
+
