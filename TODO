@@ -6,6 +6,10 @@ General:
 --info
 --out FILE
 --clean (deletes unreferenced coords adjusting indices)
+FILE [FILE...]
+GUI frontend?
+separate object ("o") support
+don't run analyzing pass if not needed
 
 Operations on vertices:
 
@@ -13,9 +17,11 @@ Operations on vertices:
 --rotate[xyz]
 --scale[xyz]
 --scale-absolute[xyz]
+--mirror[xyz]
 
 Normals:
 
+--auto-normals [THRESHOLD-ANGLE]
 --smooth-normals
 --flat-normals
 --normalize-normals
@@ -29,3 +35,4 @@ Groups:
 --delete-material MTL
 --delete-group GRP
 --delete-object OBJ
+
