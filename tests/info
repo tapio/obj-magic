@@ -1,2 +1,11 @@
 #!/bin/bash
-exit 1
+
+INFILE="$DATADIR/square.obj"
+OUTFILE="$TEMPDIR/info.obj"
+REFFILE="$DATADIR/square-info.obj"
+
+$BIN --info  "$INFILE" > "$OUTFILE"
+
+cmp -s "$REFFILE" "$OUTFILE"
+exit $?
+

@@ -1,0 +1,12 @@
+obj-magic v0.2
+Filename: /home/tapio/src/obj-magic/test-data/square.obj
+
+Vertices: 4
+TexCoords: 0
+Normals: 0
+Faces: 1
+
+Center: x:0 y:0 z:0
+Size: x:2 y:2 z:0
+Lower bounds: x:-1 y:-1 z:0
+Upper bounds: x:1 y:1 z:0
