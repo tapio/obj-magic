@@ -19,12 +19,12 @@ public:
 					size_t pos = arg.find('=');
 					if (pos != std::string::npos) {
 						longopts.insert(arg.substr(0, pos));
-						allopts.push_back(arg.substr(0, pos));
+						allopts.push_back("--" + arg.substr(0, pos));
 						allopts.push_back(arg.substr(pos+1));
 						continue;
 					}
 					longopts.insert(arg);
-					allopts.push_back(arg);
+					allopts.push_back("--" + arg);
 				} else { // Short opt
 					for (int j = 1; j < l; ++j) {
 						if (arg[j] == '=') { // Handle argument format: -a=123
@@ -32,7 +32,7 @@ public:
 							break;
 						}
 						shortopts.insert(arg[j]);
-						allopts.push_back(std::string(arg[j], 1));
+						allopts.push_back("-" + arg.substr(j,1));
 					}
 				}
 			} else if (arg[0] != '-') {
@@ -51,13 +51,14 @@ public:
 	template<typename T> // std::string specialized below this class
 	T arg(char shortopt, std::string longopt, T default_arg = T()) {
 		for (std::vector<std::string>::const_iterator it = allopts.begin(); it != allopts.end(); ++it) {
-			if (*it == std::string(shortopt, 1) || *it == longopt) {
+			if (*it == "-" + shortopt || *it == "--" + longopt) {
 				++it;
-				if (it == allopts.end() || (*it)[0] == '-') return default_arg;
+				if (it == allopts.end()) return default_arg;
 				T ret = T();
 				std::istringstream iss(*it);
 				iss >> ret;
-				return ret;
+				if (!iss.fail()) return ret;
+				else return default_arg;
 			}
 		}
 		return default_arg;
