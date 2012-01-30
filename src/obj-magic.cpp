@@ -34,31 +34,20 @@ int main(int argc, char* argv[]) {
 	if (args.opt('h', "help") || argc < 3) {
 		std::cerr << "Usage: " << args.app() << " PARAM [PARAM...] FILE" << std::endl;
 		std::cerr << "Parameters:" << std::endl;
-		std::cerr << " -h   --help               print this help and exit" << std::endl;
-		std::cerr << " -v   --version            print version and exit" << std::endl;
-		std::cerr << " -i   --info               print info about the object and exit" << std::endl;
-		std::cerr << " -n   --normalize-normals  renormalize all normals" << std::endl;
-		std::cerr << " -s   --scale SCALE        scale object along all axes SCALE amount" << std::endl;
-		std::cerr << "      --scalex SCALE       scale object along x axis SCALE amount" << std::endl;
-		std::cerr << "      --scaley SCALE       scale object along y axis SCALE amount" << std::endl;
-		std::cerr << "      --scalez SCALE       scale object along z axis SCALE amount" << std::endl;
-		std::cerr << " -c   --center             center object along all axes" << std::endl;
-		std::cerr << "      --centerx            center object x axis" << std::endl;
-		std::cerr << "      --centery            center object y axis" << std::endl;
-		std::cerr << "      --centerz            center object z axis" << std::endl;
-		std::cerr << "      --mirror             mirror object along all axes" << std::endl;
-		std::cerr << "      --mirrorx            mirror object along x axis" << std::endl;
-		std::cerr << "      --mirrory            mirror object along y axis" << std::endl;
-		std::cerr << "      --mirrorz            mirror object along z axis" << std::endl;
-		std::cerr << "      --translate AMOUNT   translate along all axes AMOUNT amount" << std::endl;
-		std::cerr << "      --translatex AMOUNT  translate along x axis AMOUNT amount" << std::endl;
-		std::cerr << "      --translatey AMOUNT  translate along y axis AMOUNT amount" << std::endl;
-		std::cerr << "      --translatez AMOUNT  translate along z axis AMOUNT amount" << std::endl;
-		std::cerr << "      --rotate AMOUNT      rotate along all axes AMOUNT degrees" << std::endl;
-		std::cerr << "      --rotatex AMOUNT     rotate along x axis AMOUNT degrees" << std::endl;
-		std::cerr << "      --rotatey AMOUNT     rotate along y axis AMOUNT degrees" << std::endl;
-		std::cerr << "      --rotatez AMOUNT     rotate along z axis AMOUNT degrees" << std::endl;
+		std::cerr << " -h   --help                    print this help and exit" << std::endl;
+		std::cerr << " -v   --version                 print version and exit" << std::endl;
+		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
+		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
+		std::cerr << " -s   --scale[xyz] SCALE        scale object SCALE amount" << std::endl;
+		std::cerr << " -c   --center[xyz]             center object" << std::endl;
+		std::cerr << "      --mirror[xyz]             mirror object" << std::endl;
+		std::cerr << "      --translate[xyz] AMOUNT   translate AMOUNT amount" << std::endl;
+		std::cerr << "      --rotate[xyz] AMOUNT      rotate along axis AMOUNT degrees" << std::endl;
+		std::cerr << std::endl;
+		std::cerr << "[xyz] means that most long options can be suffixed with x, y or z to only operate on that axis." << std::endl;
+		std::cerr << "No suffix (or short form) assumes all axes." << std::endl;
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
+		std::cerr << "     or: " << args.app() << " --mirrorx model.obj" << std::endl;
 		return args.opt('h', "help") ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 

@@ -17,7 +17,9 @@ execute commands in the order they are given in command line {v2.0}
 Operations on vertices:
 
 --set-size[xyz] (max-min = size) {v1.0}
+--set-size-individual[xyz] (max-min = size) {v1.0}
 --set-maximum[xyz] {v1.0}
+--set-maximum-individual[xyz] {v1.0}
 
 Normals:
 
