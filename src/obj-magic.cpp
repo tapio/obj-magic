@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Parameters:" << std::endl;
 		std::cerr << " -h   --help                    print this help and exit" << std::endl;
 		std::cerr << " -v   --version                 print version and exit" << std::endl;
+		std::cerr << " -o   --out FILE                put output to FILE instead of stdout" << std::endl;
 		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
 		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
 		std::cerr << " -s   --scale[xyz] SCALE        scale object SCALE amount" << std::endl;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "      --translate[xyz] AMOUNT   translate AMOUNT amount" << std::endl;
 		std::cerr << "      --rotate[xyz] AMOUNT      rotate along axis AMOUNT degrees" << std::endl;
 		std::cerr << std::endl;
-		std::cerr << "[xyz] means that most long options can be suffixed with x, y or z to only operate on that axis." << std::endl;
+		std::cerr << "[xyz] - long option suffixed with x, y or z operates only on that axis." << std::endl;
 		std::cerr << "No suffix (or short form) assumes all axes." << std::endl;
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
 		std::cerr << "     or: " << args.app() << " --mirrorx model.obj" << std::endl;
@@ -53,6 +54,19 @@ int main(int argc, char* argv[]) {
 
 	bool info = args.opt('i', "info");
 	bool normalize_normals = args.opt('n', "normalize-normals");
+
+	// Output stream handling
+	std::ofstream fout;
+	std::string outfile = args.arg<std::string>('o', "out");
+	std::cerr << outfile << std::endl;
+	if (!outfile.empty()) {
+		fout.open(outfile.c_str());
+		if (fout.fail()) {
+			std::cerr << "Failed to open file " << outfile << " for output" << std::endl;
+			return EXIT_FAILURE;
+		}
+	}
+	std::ostream& out = outfile.empty() ? std::cout : fout;
 
 	vec3 scale(args.arg('s', "scale", 1.0f));
 	scale.x *= args.arg(' ', "scalex", 1.0f);
@@ -117,18 +131,18 @@ int main(int argc, char* argv[]) {
 		center *= (lbound + ubound) * 0.5f;
 		// Output info?
 		if (info) {
-			std::cout << APPNAME << " " << VERSION << std::endl;
-			std::cout << "Filename: " << filename << std::endl;
-			std::cout << std::endl;
-			std::cout << "Vertices: " << v_count << std::endl;
-			std::cout << "TexCoords: " << vt_count << std::endl;
-			std::cout << "Normals: " << vn_count << std::endl;
-			std::cout << "Faces: " << f_count << std::endl;
-			std::cout << std::endl;
-			std::cout << "Center: " << toString((lbound + ubound) * 0.5f) << std::endl;
-			std::cout << "Size: " << toString(ubound - lbound) << std::endl;
-			std::cout << "Lower bounds: " << toString(lbound) << std::endl;
-			std::cout << "Upper bounds: " << toString(ubound) << std::endl;
+			out << APPNAME << " " << VERSION << std::endl;
+			out << "Filename: " << filename << std::endl;
+			out << std::endl;
+			out << "Vertices: " << v_count << std::endl;
+			out << "TexCoords: " << vt_count << std::endl;
+			out << "Normals: " << vn_count << std::endl;
+			out << "Faces: " << f_count << std::endl;
+			out << std::endl;
+			out << "Center: " << toString((lbound + ubound) * 0.5f) << std::endl;
+			out << "Size: " << toString(ubound - lbound) << std::endl;
+			out << "Lower bounds: " << toString(lbound) << std::endl;
+			out << "Upper bounds: " << toString(ubound) << std::endl;
 			return EXIT_SUCCESS;
 		}
 	}
@@ -147,13 +161,13 @@ int main(int argc, char* argv[]) {
 			if (!isOne(scale)) in *= scale;
 			if (!isZero(rotangles)) in = rotation * in;
 			if (!isZero(translate)) in += translate;
-			std::cout << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+			out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
 			if (normalize_normals) normalize(in);
-			std::cout << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
+			out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
-			std::cout << row << std::endl;
+			out << row << std::endl;
 		}
 	}
 	return EXIT_SUCCESS;
