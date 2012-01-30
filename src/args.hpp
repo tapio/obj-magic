@@ -51,7 +51,7 @@ public:
 	template<typename T> // std::string specialized below this class
 	T arg(char shortopt, std::string longopt, T default_arg = T()) {
 		for (std::vector<std::string>::const_iterator it = allopts.begin(); it != allopts.end(); ++it) {
-			if (*it == "-" + shortopt || *it == "--" + longopt) {
+			if (*it == "-" + std::string(1, shortopt) || *it == "--" + longopt) {
 				++it;
 				if (it == allopts.end()) return default_arg;
 				T ret = T();
@@ -80,7 +80,7 @@ private:
 template<>
 std::string Args::arg<std::string>(char shortopt, std::string longopt, std::string default_arg) {
 	for (std::vector<std::string>::const_iterator it = allopts.begin(); it != allopts.end(); ++it) {
-		if (*it == std::string(shortopt, 1) || *it == longopt) {
+		if (*it == "-" + std::string(1, shortopt) || *it == "--" + longopt) {
 			++it;
 			if (it == allopts.end() || (*it)[0] == '-') return default_arg;
 			return *it;
