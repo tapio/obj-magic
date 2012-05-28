@@ -43,7 +43,7 @@ If it doesn't work for you, just compile all .cpp files in the root directory in
 * Doesn't modify lines unless necessary
 	* Version control system friendliness
 	* Preserving normals seems to be hard with most 3d modelling softwares
-* Effiency
+* Efficiency
 	* No intermediate form, no unnecessary parsing
 	* Many operations can be done in one simple pass
 	* --> Results in quick operation and very low memory usage
