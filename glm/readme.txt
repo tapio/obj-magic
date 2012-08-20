@@ -37,6 +37,44 @@ More informations in GLM manual:
 http://glm.g-truc.net/glm-0.9.3.pdf
 
 ================================================================================
+GLM 0.9.3.4: 2012-06-30
+--------------------------------------------------------------------------------
+- Added SSE4 and AVX2 detection.
+- Removed VIRTREV_xstream and the incompatibility generated with GCC
+- Fixed C++11 compiler option for GCC
+- Removed MS language extension option for GCC (not fonctionnal)
+- Fixed bitfieldExtract for vector types
+- Fixed warnings
+- Fixed SSE includes
+
+================================================================================
+GLM 0.9.3.3: 2012-05-10
+--------------------------------------------------------------------------------
+- Fixed isinf and isnan
+- Improved compatibility with Intel compiler
+- Added CMake test build options: SIMD, C++11, fast math and MS land ext
+- Fixed SIMD mat4 test on GCC
+- Fixed perspectiveFov implementation
+- Fixed matrixCompMult for none-square matrices
+- Fixed namespace issue on stream operators
+- Fixed various warnings
+- Added VC11 support
+
+================================================================================
+GLM 0.9.3.2: 2012-03-15
+--------------------------------------------------------------------------------
+- Fixed doxygen documentation
+- Fixed Clang version detection
+- Fixed simd mat4 /= operator
+
+================================================================================
+GLM 0.9.3.1: 2012-01-25
+--------------------------------------------------------------------------------
+- Fixed platform detection
+- Fixed warnings
+- Removed detail code from Doxygen doc
+
+================================================================================
 GLM 0.9.3.0: 2012-01-09
 --------------------------------------------------------------------------------
 - Added CPP Check project

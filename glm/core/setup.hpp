@@ -36,7 +36,7 @@
 #define GLM_VERSION_MAJOR			0
 #define GLM_VERSION_MINOR			9
 #define GLM_VERSION_PATCH			3
-#define GLM_VERSION_REVISION		0
+#define GLM_VERSION_REVISION		4
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Platform
@@ -44,35 +44,29 @@
 #define GLM_PLATFORM_UNKNOWN		0x00000000
 #define GLM_PLATFORM_WINDOWS		0x00010000
 #define GLM_PLATFORM_LINUX			0x00020000
-#define GLM_PLATFORM_MACOSX			0x00040000
-#define GLM_PLATFORM_IOS			0x00080000
+#define GLM_PLATFORM_APPLE			0x00040000
+//#define GLM_PLATFORM_IOS			0x00080000
 #define GLM_PLATFORM_ANDROID		0x00100000
 #define GLM_PLATFORM_CHROME_NACL	0x00200000
-#define GLM_PLATFORM_UNIX			0x00040000
+#define GLM_PLATFORM_UNIX			0x00400000
+#define GLM_PLATFORM_QNXNTO			0x00800000
 
 #ifdef GLM_FORCE_PLATFORM_UNKNOWN
 #	define GLM_PLATFORM GLM_PLATFORM_UNKNOWN
+#elif defined(__QNXNTO__)
+#   define GLM_PLATFORM GLM_PLATFORM_QNXNTO
+#elif defined(__APPLE__)
+#   define GLM_PLATFORM GLM_PLATFORM_APPLE
 #elif defined(_WIN32)
 #	define GLM_PLATFORM GLM_PLATFORM_WINDOWS
-#elif defined(__unix)
-#   if defined(__APPLE__)
-#       include "TargetConditionals.h"
-#       if defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)
-#           define GLM_PLATFORM GLM_PLATFORM_IOS
-#       elif defined(TARGET_OS_MAC)
-#           define GLM_PLATFORM GLM_PLATFORM_MACOSX
-#       else
-#           define GLM_PLATFORM GLM_PLATFORM_UNKNOWN
-#       endif
-#   elif defined(ANDROID)
-#	define GLM_PLATFORM GLM_PLATFORM_ANDROID
-#   elif defined(__linux)
-#	define GLM_PLATFORM GLM_PLATFORM_LINUX
-#   else
-#	define GLM_PLATFORM GLM_PLATFORM_UNIX
-#   endif
 #elif defined(__native_client__)
 #	define GLM_PLATFORM GLM_PLATFORM_CHROME_NACL
+#elif defined(__ANDROID__)
+#   define GLM_PLATFORM GLM_PLATFORM_ANDROID
+#elif defined(__linux)
+#   define GLM_PLATFORM GLM_PLATFORM_LINUX
+#elif defined(__unix)
+#   define GLM_PLATFORM GLM_PLATFORM_UNIX
 #else
 #	define GLM_PLATFORM GLM_PLATFORM_UNKNOWN
 #endif//
@@ -82,10 +76,10 @@
 #	define GLM_MESSAGE_PLATFORM_DISPLAYED
 #	if(GLM_PLATFORM & GLM_PLATFORM_WINDOWS)
 #		pragma message("GLM: Windows platform detected")
-#	elif(GLM_PLATFORM & GLM_PLATFORM_IOS)
-#		pragma message("GLM: iOS platform detected")
-#	elif(GLM_PLATFORM & GLM_PLATFORM_MACOSX)
-#		pragma message("GLM: MacOSX platform detected")
+//#	elif(GLM_PLATFORM & GLM_PLATFORM_IOS)
+//#		pragma message("GLM: iOS platform detected")
+#	elif(GLM_PLATFORM & GLM_PLATFORM_APPLE)
+#		pragma message("GLM: Apple platform detected")
 #	elif(GLM_PLATFORM & GLM_PLATFORM_LINUX)
 #		pragma message("GLM: Linux platform detected")
 #	elif(GLM_PLATFORM & GLM_PLATFORM_UNIX)
@@ -272,28 +266,28 @@
 
 // Clang
 #elif defined(__clang__)
-#	if(CLANG_VERSION_MAJOR == 2) && (CLANG_VERSION_MINOR == 6)
+#	if(__clang_major__ == 2) && (__clang_minor__ == 6)
 #		define GLM_COMPILER GLM_COMPILER_CLANG26
-#	elif(CLANG_VERSION_MAJOR == 2) && (CLANG_VERSION_MINOR == 7)
+#	elif(__clang_major__ == 2) && (__clang_minor__ == 7)
 #		define GLM_COMPILER GLM_COMPILER_CLANG27
-#	elif(CLANG_VERSION_MAJOR == 2) && (CLANG_VERSION_MINOR == 8)
+#	elif(__clang_major__ == 2) && (__clang_minor__ == 8)
 #		define GLM_COMPILER GLM_COMPILER_CLANG28
-#	elif(CLANG_VERSION_MAJOR == 2) && (CLANG_VERSION_MINOR == 9)
+#	elif(__clang_major__ == 2) && (__clang_minor__ == 9)
 #		define GLM_COMPILER GLM_COMPILER_CLANG29
-#	elif(CLANG_VERSION_MAJOR == 3) && (CLANG_VERSION_MINOR == 0)
+#	elif(__clang_major__ == 3) && (__clang_minor__ == 0)
 #		define GLM_COMPILER GLM_COMPILER_CLANG30
-#	elif(CLANG_VERSION_MAJOR == 3) && (CLANG_VERSION_MINOR == 1)
+#	elif(__clang_major__ == 3) && (__clang_minor__ == 1)
 #		define GLM_COMPILER GLM_COMPILER_CLANG31
-#	elif(CLANG_VERSION_MAJOR == 3) && (CLANG_VERSION_MINOR == 2)
+#	elif(__clang_major__ == 3) && (__clang_minor__ == 2)
 #		define GLM_COMPILER GLM_COMPILER_CLANG32
-#	elif(CLANG_VERSION_MAJOR == 3) && (CLANG_VERSION_MINOR == 3)
+#	elif(__clang_major__ == 3) && (__clang_minor__ == 3)
 #		define GLM_COMPILER GLM_COMPILER_CLANG33
 #	else
 #		define GLM_COMPILER GLM_COMPILER_CLANG
 #   endif
 
 // G++ 
-#elif defined(__GNUC__)// || defined(__llvm__) || defined(__clang__)
+#elif(defined(__GNUC__) || defined(__MINGW32__))// || defined(__llvm__) || defined(__clang__)
 #   if defined (__llvm__)
 #       define GLM_COMPILER_GCC_EXTRA GLM_COMPILER_GCC_LLVM
 #   elif defined (__clang__)
@@ -423,7 +417,7 @@
 #define GLM_LANG_CXX98			((1 << 1) | GLM_LANG_CXX)
 #define GLM_LANG_CXX03			((1 << 2) | GLM_LANG_CXX98)
 #define GLM_LANG_CXX0X			((1 << 3) | GLM_LANG_CXX03)
-#define GLM_LANG_CXX11			((1 << 4) | GLM_LANG_CXX11)
+#define GLM_LANG_CXX11			((1 << 4) | GLM_LANG_CXX0X)
 #define GLM_LANG_CXXMS			(1 << 5)
 #define GLM_LANG_CXXGNU			(1 << 6)
 
@@ -434,9 +428,8 @@
 #elif(defined(GLM_FORCE_CXX98))
 #	define GLM_LANG GLM_LANG_CXX98
 #else
-#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__STRICT_ANSI__))
-#		define GLM_LANG GLM_LANG_CXX98
-#	elif(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__)) // -std=c++0x or -std=gnu++0x
+//  -std=c++0x or -std=gnu++0x
+#	if(((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) && defined(__GXX_EXPERIMENTAL_CXX0X__)) 
 #		define GLM_LANG GLM_LANG_CXX0X
 #	elif(((GLM_COMPILER & GLM_COMPILER_VC) == GLM_COMPILER_VC) && defined(_MSC_EXTENSIONS))
 #		define GLM_LANG GLM_LANG_CXXMS
@@ -446,6 +439,10 @@
 #		else
 #			define GLM_LANG GLM_LANG_CXX98
 #		endif//(GLM_COMPILER == GLM_COMPILER_VC2010)
+#	elif((GLM_COMPILER & GLM_COMPILER_GCC) == GLM_COMPILER_GCC) //&& defined(__STRICT_ANSI__))
+#		define GLM_LANG GLM_LANG_CXX98
+#	elif((GLM_COMPILER & GLM_COMPILER_CLANG) == GLM_COMPILER_CLANG) 
+#		define GLM_LANG GLM_LANG_CXX98
 #	else
 #		define GLM_LANG GLM_LANG_CXX
 #	endif
@@ -465,6 +462,8 @@
 #		pragma message("GLM: C++ with GNU language extensions")
 #	elif(GLM_LANG == GLM_LANG_CXXMS)
 #		pragma message("GLM: C++ with VC language extensions")
+#   else
+#       pragma message("GLM: C++ language undetected")
 #	endif//GLM_MODEL
 #endif//GLM_MESSAGE
 
@@ -473,15 +472,21 @@
 
 // User defines: GLM_FORCE_PURE GLM_FORCE_SSE2 GLM_FORCE_AVX
 
-#define GLM_ARCH_PURE		0x0000 //(0x0000)
-#define GLM_ARCH_SSE2		0x0001 //(0x0001)
-#define GLM_ARCH_SSE3		0x0003 //(0x0002 | GLM_ARCH_SSE2)
-#define GLM_ARCH_AVX		0x0007 //(0x0004 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#define GLM_ARCH_PURE		0x0000
+#define GLM_ARCH_SSE2		0x0001
+#define GLM_ARCH_SSE3		0x0002// | GLM_ARCH_SSE2
+#define GLM_ARCH_SSE4		0x0004// | GLM_ARCH_SSE3 | GLM_ARCH_SSE2
+#define GLM_ARCH_AVX		0x0008// | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2
+#define GLM_ARCH_AVX2		0x0010// | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2
 
 #if(defined(GLM_FORCE_PURE))
 #	define GLM_ARCH GLM_ARCH_PURE
+#elif(defined(GLM_FORCE_AVX2))
+#	define GLM_ARCH GLM_ARCH_AVX2
 #elif(defined(GLM_FORCE_AVX))
 #	define GLM_ARCH GLM_ARCH_AVX
+#elif(defined(GLM_FORCE_SSE4))
+#	define GLM_ARCH GLM_ARCH_SSE4
 #elif(defined(GLM_FORCE_SSE3))
 #	define GLM_ARCH GLM_ARCH_SSE3
 #elif(defined(GLM_FORCE_SSE2))
@@ -502,19 +507,15 @@
 #	else
 #		define GLM_ARCH GLM_ARCH_PURE
 #	endif
-#elif(GLM_COMPILER & GLM_COMPILER_LLVM_GCC)
-#	if(defined(__AVX__))
+#elif((GLM_PLATFORM & GLM_PLATFORM_APPLE) && (GLM_COMPILER & GLM_COMPILER_GCC))
+#	define GLM_ARCH GLM_ARCH_PURE
+#elif(((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))) || (GLM_COMPILER & GLM_COMPILER_LLVM_GCC))
+#	if(defined(__AVX2__))
+#		define GLM_ARCH GLM_ARCH_AVX2
+#	elif(defined(__AVX__))
 #		define GLM_ARCH GLM_ARCH_AVX
-#	elif(defined(__SSE3__))
-#		define GLM_ARCH GLM_ARCH_SSE3
-#	elif(defined(__SSE2__))
-#		define GLM_ARCH GLM_ARCH_SSE2
-#	else
-#		define GLM_ARCH GLM_ARCH_PURE
-#	endif
-#elif((GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__)))
-#	if(defined(__AVX__))
-#		define GLM_ARCH GLM_ARCH_AVX
+#	elif(defined(__SSE4__))
+#		define GLM_ARCH GLM_ARCH_SSE4
 #	elif(defined(__SSE3__))
 #		define GLM_ARCH GLM_ARCH_SSE3
 #	elif(defined(__SSE2__))
@@ -526,28 +527,38 @@
 #	define GLM_ARCH GLM_ARCH_PURE
 #endif
 
-#if(GLM_ARCH != GLM_ARCH_PURE)
-#if((GLM_ARCH & GLM_ARCH_AVX) == GLM_ARCH_AVX)
+//#if(GLM_ARCH != GLM_ARCH_PURE)
+#if(GLM_ARCH & GLM_ARCH_AVX2)
 #	include <immintrin.h>
 #endif//GLM_ARCH
-#if((GLM_ARCH & GLM_ARCH_SSE3) == GLM_ARCH_SSE3)
+#if(GLM_ARCH & GLM_ARCH_AVX)
+#	include <immintrin.h>
+#endif//GLM_ARCH
+#if(GLM_ARCH & GLM_ARCH_SSE4)
+#	include <smmintrin.h>
+#endif//GLM_ARCH
+#if(GLM_ARCH & GLM_ARCH_SSE3)
 #	include <pmmintrin.h>
 #endif//GLM_ARCH
-#if((GLM_ARCH & GLM_ARCH_SSE2) == GLM_ARCH_SSE2)
+#if(GLM_ARCH & GLM_ARCH_SSE2)
 #	include <emmintrin.h>
 #endif//GLM_ARCH
-#endif//(GLM_ARCH != GLM_ARCH_PURE)
+//#endif//(GLM_ARCH != GLM_ARCH_PURE)
 
 #if(defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_ARCH_DISPLAYED))
 #	define GLM_MESSAGE_ARCH_DISPLAYED
 #	if(GLM_ARCH == GLM_ARCH_PURE)
 #		pragma message("GLM: Platform independent")
 #	elif(GLM_ARCH == GLM_ARCH_SSE2)
-#		pragma message("GLM: SSE2 build platform")
+#		pragma message("GLM: SSE2 instruction set")
 #	elif(GLM_ARCH == GLM_ARCH_SSE3)
-#		pragma message("GLM: SSE3 build platform")
+#		pragma message("GLM: SSE3 instruction set")
+#	elif(GLM_ARCH == GLM_ARCH_SSE4)
+#		pragma message("GLM: SSE4 instruction set")
 #	elif(GLM_ARCH == GLM_ARCH_AVX)
-#		pragma message("GLM: AVX build platform")
+#		pragma message("GLM: AVX instruction set")
+#	elif(GLM_ARCH == GLM_ARCH_AVX2)
+#		pragma message("GLM: AVX2 instruction set")
 #	endif//GLM_ARCH
 #endif//GLM_MESSAGE
 
@@ -557,8 +568,11 @@
 #define GLM_SUPPORT_ANONYMOUS_UNION() \
 	((GLM_LANG & GLM_LANG_CXX98) == GLM_LANG_CXX98)
 
+//#define GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() \
+//	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS) || ((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_LANG == GLM_LANG_CXX0X)))
+
 #define GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE() \
-	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS) || ((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_LANG == GLM_LANG_CXX0X)))
+	(((GLM_LANG & GLM_LANG_CXX11) == GLM_LANG_CXX11) || ((GLM_COMPILER & GLM_COMPILER_VC) && ((GLM_LANG & GLM_LANG_CXXMS) == GLM_LANG_CXXMS)) || ((GLM_LANG == GLM_LANG_CXX0X) == GLM_LANG_CXX0X))
 
 #define GLM_SUPPORT_SWIZZLE_OPERATOR() \
 	(/*defined(GLM_SWIZZLE) && */GLM_SUPPORT_ANONYMOUS_UNION_OF_STRUCTURE())

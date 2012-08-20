@@ -42,6 +42,7 @@
 // Dependency:
 #include "../glm.hpp"  
 #include "../gtc/half_float.hpp"
+#include "../gtc/quaternion.hpp"
 
 #if(defined(GLM_MESSAGES) && !defined(glm_ext))
 #	pragma message("GLM: GLM_GTX_compatibility extension included")
@@ -51,6 +52,9 @@
 #include <cfloat>
 #elif(GLM_COMPILER & GLM_COMPILER_GCC)
 #include <cmath>
+#   if(GLM_PLATFORM & GLM_PLATFORM_ANDROID)
+#       undef isfinite
+#   endif
 #endif//GLM_COMPILER
 
 namespace glm
@@ -66,6 +70,8 @@ namespace glm
 	template <typename T> GLM_FUNC_QUALIFIER detail::tvec3<T> lerp(const detail::tvec3<T>& x, const detail::tvec3<T>& y, const detail::tvec3<T>& a){return mix(x, y, a);}	//!< \brief Returns the component-wise result of x * (1.0 - a) + y * a, i.e., the linear blend of x and y using vector a. The value for a is not restricted to the range [0, 1]. (From GLM_GTX_compatibility)
 	template <typename T> GLM_FUNC_QUALIFIER detail::tvec4<T> lerp(const detail::tvec4<T>& x, const detail::tvec4<T>& y, const detail::tvec4<T>& a){return mix(x, y, a);}	//!< \brief Returns the component-wise result of x * (1.0 - a) + y * a, i.e., the linear blend of x and y using vector a. The value for a is not restricted to the range [0, 1]. (From GLM_GTX_compatibility)
 
+	template <typename T> GLM_FUNC_QUALIFIER T slerp(detail::tquat<T> const & x, detail::tquat<T> const & y, T const & a){return mix(x, y, a);} //!< \brief Returns the slurp interpolation between two quaternions.
+
 	template <typename T> GLM_FUNC_QUALIFIER T saturate(T x){return clamp(x, T(0), T(1));}														//!< \brief Returns clamp(x, 0, 1) for each component in x. (From GLM_GTX_compatibility)
 	template <typename T> GLM_FUNC_QUALIFIER detail::tvec2<T> saturate(const detail::tvec2<T>& x){return clamp(x, T(0), T(1));}					//!< \brief Returns clamp(x, 0, 1) for each component in x. (From GLM_GTX_compatibility)
 	template <typename T> GLM_FUNC_QUALIFIER detail::tvec3<T> saturate(const detail::tvec3<T>& x){return clamp(x, T(0), T(1));}					//!< \brief Returns clamp(x, 0, 1) for each component in x. (From GLM_GTX_compatibility)
@@ -80,16 +86,6 @@ namespace glm
 	template <typename valType> detail::tvec2<bool> isfinite(const detail::tvec2<valType>& x);				//!< \brief Test whether or not a scalar or each vector component is a finite value. (From GLM_GTX_compatibility)
 	template <typename valType> detail::tvec3<bool> isfinite(const detail::tvec3<valType>& x);				//!< \brief Test whether or not a scalar or each vector component is a finite value. (From GLM_GTX_compatibility)
 	template <typename valType> detail::tvec4<bool> isfinite(const detail::tvec4<valType>& x);				//!< \brief Test whether or not a scalar or each vector component is a finite value. (From GLM_GTX_compatibility)
-
-	template <typename genType> bool isinf(genType const & x);														//!< \brief Determines whether the given floating-point value is infinite. (From GLM_GTX_compatibility extension) 
-	template <typename genType> detail::tvec2<bool> isinf(const detail::tvec2<genType>& x);					//!< \brief Determines whether the given floating-point value is infinite. (From GLM_GTX_compatibility extension) 
-	template <typename genType> detail::tvec3<bool> isinf(const detail::tvec3<genType>& x);					//!< \brief Determines whether the given floating-point value is infinite. (From GLM_GTX_compatibility extension) 
-	template <typename genType> detail::tvec4<bool> isinf(const detail::tvec4<genType>& x);					//!< \brief Determines whether the given floating-point value is infinite. (From GLM_GTX_compatibility extension) 
-
-	template <typename genType> bool isnan(genType const & x);														//!< \brief Checks given floating-point value for not a number (NAN) (From GLM_GTX_compatibility extension)
-	template <typename genType> detail::tvec2<bool> isnan(const detail::tvec2<genType>& x);					//!< \brief Checks given floating-point value for not a number (NAN) (From GLM_GTX_compatibility extension)
-	template <typename genType> detail::tvec3<bool> isnan(const detail::tvec3<genType>& x);					//!< \brief Checks given floating-point value for not a number (NAN) (From GLM_GTX_compatibility extension)
-	template <typename genType> detail::tvec4<bool> isnan(const detail::tvec4<genType>& x);					//!< \brief Checks given floating-point value for not a number (NAN) (From GLM_GTX_compatibility extension)
 
 	typedef bool						bool1;			//!< \brief boolean type with 1 component. (From GLM_GTX_compatibility extension)
 	typedef detail::tvec2<bool>			bool2;			//!< \brief boolean type with 2 components. (From GLM_GTX_compatibility extension)
