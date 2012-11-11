@@ -35,7 +35,7 @@ Run:
 
 	./make.sh
 
-If it doesn't work for you, just compile all .cpp files in the root directory into an executable using your preferred method / compiler.
+If it doesn't work for you, just compile all .cpp files in the `src/` directory into an executable using your preferred method / compiler.
 
 
 ## Design Goals ##
