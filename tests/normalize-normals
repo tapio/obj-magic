@@ -1,2 +1,11 @@
 #!/bin/bash
-exit 1
+
+INFILE="$DATADIR/square-normals.obj"
+OUTFILE="$TEMPDIR/normalize-normals.obj"
+REFFILE="$DATADIR/square-normalize-normals.obj"
+
+$BIN --normalize-normals  "$INFILE" > "$OUTFILE"
+
+cmp -s "$REFFILE" "$OUTFILE"
+exit $?
+

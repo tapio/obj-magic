@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
 			out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
-			if (normalize_normals) normalize(in);
+			if (normalize_normals) in = normalize(in);
 			out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
 		} else {
 			out << row << std::endl;
