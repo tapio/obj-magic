@@ -3,25 +3,22 @@ TODO
 
 Milestones: {v1.0} {v2.0} {v3.0}
 
-Tests:
-every command should have a test case
-
 General:
 
+test cases for all operations {v1.0}
 --clean (deletes unreferenced coords adjusting indices)
 FILE [FILE...]
 GUI frontend? {v2.0}
 separate object ("o") support
 edit files in-place {v1.0}
-test cases for all operations {v1.0}
 execute commands in the order they are given in command line {v2.0}
 
 Operations on vertices:
 
---fit[xyz] (max-min = size) {v1.0}
 --fit-individual[xyz] (max-min = size) {v1.0}
 --set-maximum[xyz] {v1.0}
 --set-maximum-individual[xyz] {v1.0}
+--flip-xy etc. (needs to flip normals too)
 
 Normals:
 
