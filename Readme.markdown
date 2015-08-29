@@ -4,6 +4,13 @@ OBJ-MAGIC
 ## Introduction ##
 
 This is a command line tool for manipulating Wavefront OBJ 3d meshes.
+The idea is that when processing third-party models for use,
+I want to quickly scale them to the correct scale for me, center them etc.
+It's much faster to issue a couple of commands than to fire up a 3d modelling program,
+try to remember how it worked, where the functions I need are and finally hope
+it won't break the normals or other things when exporting.
+Of course you might feel differently.
+
 Non-exhaustive list of features include:
 
 * Scaling
@@ -11,10 +18,11 @@ Non-exhaustive list of features include:
 * Translating
 * Centering
 * Etc...
-* More to come
 
 Most transformations can be done to each axis x/y/z separately or together.
-Doing multiple different operations at the same time is also possible.
+Doing multiple different operations at the same time is also possible,
+but some combinations may result in funky behaviour, so be careful.
+This should be improved in the future.
 
 
 ## Usage ##
