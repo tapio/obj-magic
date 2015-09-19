@@ -22,7 +22,6 @@ Operations on vertices:
 
 Normals:
 
---invert-normals
 --auto-normals [THRESHOLD-ANGLE]
 --smooth-normals
 --flat-normals
@@ -34,6 +33,7 @@ Faces:
 
 Groups:
 
+--optimize-materials
 --delete-material MTL
 --delete-group GRP
 --delete-object OBJ
