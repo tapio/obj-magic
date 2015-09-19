@@ -11,7 +11,7 @@
 #include "args.hpp"
 
 #define APPNAME "obj-magic"
-#define VERSION "v0.2"
+#define VERSION "v0.3"
 
 #define EPSILON 0.00001f
 
@@ -40,8 +40,10 @@ int main(int argc, char* argv[]) {
 		std::cerr << " -o   --out FILE                put output to FILE instead of stdout" << std::endl;
 		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
 		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
-		std::cerr << " -s   --scale[xyz] SCALE        scale object SCALE amount" << std::endl;
 		std::cerr << " -c   --center[xyz]             center object" << std::endl;
+		std::cerr << " -s   --scale[xyz] SCALE        scale object SCALE amount" << std::endl;
+		std::cerr << "      --scaleuv[xy] SCALE       multiply texture coords by SCALE amount" << std::endl;
+		std::cerr << "      --flipuv[xy]              make texture coord 1-original" << std::endl;
 		std::cerr << "      --mirror[xyz]             mirror object" << std::endl;
 		std::cerr << "      --translate[xyz] AMOUNT   translate AMOUNT amount" << std::endl;
 		std::cerr << "      --rotate[xyz] AMOUNT      rotate along axis AMOUNT degrees" << std::endl;
@@ -74,6 +76,13 @@ int main(int argc, char* argv[]) {
 	scale.x *= args.arg(' ', "scalex", 1.0f);
 	scale.y *= args.arg(' ', "scaley", 1.0f);
 	scale.z *= args.arg(' ', "scalez", 1.0f);
+
+	vec2 scaleUv(args.arg(' ', "scaleuv", 1.0f));
+	scaleUv.x *= args.arg(' ', "scaleuvx", 1.0f);
+	scaleUv.y *= args.arg(' ', "scaleuvy", 1.0f);
+
+	bool flipUvX = args.opt(' ', "flipuv") || args.opt(' ', "flipuvx");
+	bool flipUvY = args.opt(' ', "flipuv") || args.opt(' ', "flipuvy");
 
 	vec3 translate(args.arg(' ', "translate", 0.0f));
 	translate.x += args.arg(' ', "translatex", 0.0f);
@@ -180,6 +189,13 @@ int main(int argc, char* argv[]) {
 			if (!isZero(rotangles)) in = rotation * in;
 			if (!isZero(translate)) in += translate;
 			out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+		} else if (row.substr(0,3) == "vt ") {  // Tex coords
+			srow >> tempst >> in.x >> in.y;
+			if (flipUvX) in.x = 1.0f - in.x;
+			if (flipUvY) in.y = 1.0f - in.y;
+			in.x *= scaleUv.x;
+			in.y *= scaleUv.y;
+			out << "vt " << in.x << " " << in.y << std::endl;
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
 			if (normalize_normals) in = normalize(in);
