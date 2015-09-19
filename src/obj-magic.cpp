@@ -11,7 +11,7 @@
 #include "args.hpp"
 
 #define APPNAME "obj-magic"
-#define VERSION "v0.3"
+#define VERSION "v0.4"
 
 #define EPSILON 0.00001f
 
@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << " -h   --help                    print this help and exit" << std::endl;
 		std::cerr << " -v   --version                 print version and exit" << std::endl;
 		std::cerr << " -o   --out FILE                put output to FILE instead of stdout" << std::endl;
+		std::cerr << " -O   --overwrite               edit input file directly, overwriting it" << std::endl;
 		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
 		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
 		std::cerr << " -n   --invert-normals          invert all normals" << std::endl;
@@ -62,17 +63,21 @@ int main(int argc, char* argv[]) {
 	vec3 normal_scale = args.opt(' ', "invert-normals") ? vec3(-1.0f) : vec3(1.0);
 
 	// Output stream handling
-	std::ofstream fout;
+	std::string infile = argv[argc-1];
 	std::string outfile = args.arg<std::string>('o', "out");
-	std::cerr << outfile << std::endl;
-	if (!outfile.empty()) {
+	std::ofstream fout;
+	std::stringstream sout;
+	bool inPlaceOutput = false;
+	if (outfile == infile || args.opt('O', "overwrite")) { // In-place
+		inPlaceOutput = true;
+	} else if (!outfile.empty()) {
 		fout.open(outfile.c_str());
 		if (fout.fail()) {
 			std::cerr << "Failed to open file " << outfile << " for output" << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
-	std::ostream& out = outfile.empty() ? std::cout : fout;
+	std::ostream& out = inPlaceOutput ? sout : (outfile.empty() ? std::cout : fout);
 
 	vec3 scale(args.arg('s', "scale", 1.0f));
 	scale.x *= args.arg(' ', "scalex", 1.0f);
@@ -120,10 +125,9 @@ int main(int argc, char* argv[]) {
 	if (rotangles.z != 0.0f) temprot = rotate(temprot, rotangles.z, vec3(0,0,1));
 	mat3 rotation(temprot);
 
-	std::string filename = argv[argc-1];
-	std::ifstream file(filename.c_str(), std::ios::binary);
+	std::ifstream file(infile.c_str(), std::ios::binary);
 	if (!file.is_open()) {
-		std::cerr << "Failed to open file " << filename << std::endl;
+		std::cerr << "Failed to open file " << infile << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -152,7 +156,7 @@ int main(int argc, char* argv[]) {
 		// Output info?
 		if (info) {
 			out << APPNAME << " " << VERSION << std::endl;
-			out << "Filename: " << filename << std::endl;
+			out << "Filename: " << infile << std::endl;
 			out << std::endl;
 			out << "Vertices: " << v_count << std::endl;
 			out << "TexCoords: " << vt_count << std::endl;
@@ -207,5 +211,16 @@ int main(int argc, char* argv[]) {
 			out << row << std::endl;
 		}
 	}
+
+	if (inPlaceOutput) {
+		file.close();
+		fout.open(infile.c_str());
+		if (fout.fail()) {
+			std::cerr << "Failed to open file " << infile << " for output" << std::endl;
+			return EXIT_FAILURE;
+		}
+		fout << sout.rdbuf();
+	}
+
 	return EXIT_SUCCESS;
 }

@@ -10,7 +10,6 @@ test cases for all operations {v1.0}
 FILE [FILE...]
 GUI frontend? {v2.0}
 separate object ("o") support
-edit files in-place {v1.0}
 execute commands in the order they are given in command line {v2.0}
 
 Operations on vertices:
