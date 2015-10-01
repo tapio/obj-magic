@@ -13,5 +13,6 @@ if [ "x$CXX" = "x" ]; then
 	fi
 fi
 
+set -x
 $CXX $CFLAGS src/*.cpp -o $EXENAME
 
