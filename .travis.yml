@@ -3,6 +3,12 @@ language: cpp
 compiler:
   - gcc
   - clang
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
 script:
   - ./make.sh
   - ./run-tests.sh
