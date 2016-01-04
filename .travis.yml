@@ -5,5 +5,5 @@ compiler:
   - clang
 script:
   - ./make.sh
-  - ./run-tests-sh
+  - ./run-tests.sh
 
