@@ -19,7 +19,7 @@ echo "Starting tests @ $HOSTNAME on `date -R`"
 echo "Starting tests @ $HOSTNAME on `date -R`" > "$LOGFILE"
 
 cd "$TESTDIR"
-time (
+function run_tests {
 	for test in `ls`; do
 		echo -n "Testing $test..."
 		echo >> "$LOGFILE"
@@ -43,5 +43,7 @@ time (
 		rm -rf "$TEMPDIR"
 	fi
 	echo -n "Testing completed, elapsed time: "
-)
+	return $FAILS
+}
 
+time run_tests
