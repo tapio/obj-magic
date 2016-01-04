@@ -24,7 +24,6 @@ function run_tests {
 		echo -n "Testing $test..."
 		echo >> "$LOGFILE"
 		echo "Output for test $test" >> "$LOGFILE"
-		echo >> "$LOGFILE"
 		bash "$test" >> "$LOGFILE" 2>&1
 		if [ $? -eq 0 ]; then
 			echo "OK"
@@ -35,7 +34,7 @@ function run_tests {
 	done
 
 	# Print fail count and delete temp files on success
-	if [ "$FAILS" -gt 0 ]; then
+	if [ $FAILS -gt 0 ]; then
 		echo -e "${COLOR_RED}${FAILS} failed tests${COLOR_OFF}"
 		echo "Temp files kept in $TEMPDIR"
 	else
@@ -47,3 +46,17 @@ function run_tests {
 }
 
 time run_tests
+EXITCODE=$?
+
+if [ $EXITCODE -gt 0 ] && [ "$CI" = "true" ]; then
+	echo "CI environment detected, dumping test file contents from \"$TEMPDIR\":"
+	cd "$TEMPDIR"
+	for f in `ls`; do
+		echo "### $f ###"
+		cat "$f"
+		echo
+	done
+fi
+
+exit $EXITCODE
+
