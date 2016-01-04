@@ -1,0 +1,9 @@
+sudo: false
+language: cpp
+compiler:
+  - gcc
+  - clang
+script:
+  - ./make.sh
+  - ./run-tests-sh
+
