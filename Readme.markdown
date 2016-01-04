@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tapio/obj-magic.svg)](https://travis-ci.org/tapio/obj-magic)
+
 OBJ-MAGIC
 =========
 
