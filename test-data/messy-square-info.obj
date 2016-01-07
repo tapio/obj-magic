@@ -1,0 +1,13 @@
+Vertices:      4
+TexCoords:     1
+Normals:       1
+Faces:         2
+Points:        2
+Lines:         3
+Named objects: 1
+Materials:     2
+                         x           y           z
+Center:                  0   -0.115607     0.39244
+Size:                    2     2.23121    0.784879
+Lower bounds:           -1    -1.23121           0
+Upper bounds:            1           1    0.784879

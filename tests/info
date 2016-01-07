@@ -1,8 +1,8 @@
 #!/bin/bash
 
-INFILE="$DATADIR/square.obj"
+INFILE="$DATADIR/messy-square.obj"
 OUTFILE="$TEMPDIR/info.obj"
-REFFILE="$DATADIR/square-info.obj"
+REFFILE="$DATADIR/messy-square-info.obj"
 
 # Need to strip the file path as it's different based on file location
 $BIN --info  "$INFILE" | tail -n +3 > "$OUTFILE"
