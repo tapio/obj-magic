@@ -28,6 +28,7 @@ std::string toString(vec3 vec) {
 
 template<typename T> inline bool isZero(T v) { v = abs(v); return v.x < EPSILON && v.y < EPSILON && v.z < EPSILON; }
 template<typename T> inline bool isOne(T v) { return isZero(v - T(1)); }
+template<typename T> inline bool isEqual(T a, T b) { return isZero(a - b); }
 
 int main(int argc, char* argv[]) {
 	Args args(argc, argv);
@@ -200,24 +201,33 @@ int main(int argc, char* argv[]) {
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> in.x >> in.y >> in.z;
+			vec3 old = in;
 			if (!isZero(center)) in -= center;
 			if (!isOne(mirror)) in *= mirror;
 			if (!isOne(scale)) in *= scale;
 			if (!isZero(rotangles)) in = rotation * in;
 			if (!isZero(translate)) in += translate;
-			out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+			if (old != in)
+				out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+			else out << row << std::endl;
 		} else if (row.substr(0,3) == "vt ") {  // Tex coords
 			srow >> tempst >> in.x >> in.y;
+			vec3 old = in;
 			if (flipUvX) in.x = 1.0f - in.x;
 			if (flipUvY) in.y = 1.0f - in.y;
 			in.x *= scaleUv.x;
 			in.y *= scaleUv.y;
-			out << "vt " << in.x << " " << in.y << std::endl;
+			if (old != in)
+				out << "vt " << in.x << " " << in.y << std::endl;
+			else out << row << std::endl;
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
+			vec3 old = in;
 			in *= normal_scale;
 			if (normalize_normals) in = normalize(in);
-			out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
+			if (old != in)
+				out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
+			else out << row << std::endl;
 		} else {
 			out << row << std::endl;
 		}

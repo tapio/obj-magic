@@ -9,7 +9,6 @@ test cases for all operations {v1.0}
 --clean (deletes unreferenced coords adjusting indices)
 FILE [FILE...]
 GUI frontend? {v2.0}
-separate object ("o") support
 execute commands in the order they are given in command line {v2.0}
 
 Operations on vertices:
