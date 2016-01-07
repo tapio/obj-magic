@@ -202,11 +202,11 @@ int main(int argc, char* argv[]) {
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> in.x >> in.y >> in.z;
 			vec3 old = in;
-			if (!isZero(center)) in -= center;
-			if (!isOne(mirror)) in *= mirror;
-			if (!isOne(scale)) in *= scale;
-			if (!isZero(rotangles)) in = rotation * in;
-			if (!isZero(translate)) in += translate;
+			in -= center;
+			in *= mirror;
+			in *= scale;
+			in = rotation * in;
+			in += translate;
 			if (old != in)
 				out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
 			else out << row << std::endl;
