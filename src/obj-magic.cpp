@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <limits>
+#include <map>
 
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
@@ -139,7 +140,8 @@ int main(int argc, char* argv[]) {
 	if (analyze) {
 		vec3 lbound(std::numeric_limits<float>::max());
 		vec3 ubound(-std::numeric_limits<float>::max());
-		unsigned long long v_count = 0, vt_count = 0, vn_count = 0, f_count = 0;
+		std::map<std::string, unsigned> materials;
+		unsigned long long v_count = 0, vt_count = 0, vn_count = 0, f_count = 0, p_count = 0, l_count = 0, o_count = 0;
 		while (getline(file, row)) {
 			std::istringstream srow(row);
 			vec3 in;
@@ -152,17 +154,25 @@ int main(int argc, char* argv[]) {
 			}
 			else if (row.substr(0,3) == "vt ") ++vt_count;
 			else if (row.substr(0,3) == "vn ") ++vn_count;
+			else if (row.substr(0,2) == "p ") ++p_count;
+			else if (row.substr(0,2) == "l ") ++l_count;
 			else if (row.substr(0,2) == "f ") ++f_count;
+			else if (row.substr(0,2) == "o ") ++o_count;
+			else if (row.substr(0,7) == "usemtl ") materials[row.substr(7)]++;
 		}
 		center *= (lbound + ubound) * 0.5f;
 		// Output info?
 		if (info) {
 			out << APPNAME << " " << VERSION << std::endl;
-			out << "Filename:  " << infile << std::endl;
-			out << "Vertices:  " << v_count << std::endl;
-			out << "TexCoords: " << vt_count << std::endl;
-			out << "Normals:   " << vn_count << std::endl;
-			out << "Faces:     " << f_count << std::endl;
+			out << "Filename:      " << infile << std::endl;
+			out << "Vertices:      " << v_count << std::endl;
+			out << "TexCoords:     " << vt_count << std::endl;
+			out << "Normals:       " << vn_count << std::endl;
+			out << "Faces:         " << f_count << std::endl;
+			out << "Points:        " << p_count << std::endl;
+			out << "Lines:         " << l_count << std::endl;
+			out << "Named objects: " << o_count << std::endl;
+			out << "Materials:     " << materials.size() << std::endl;
 			out << "              " << std::right << std::setw(W) << "x" << std::setw(W) << "y" << std::setw(W) << "z" << std::endl;
 			out << "Center:       " << toString((lbound + ubound) * 0.5f) << std::endl;
 			out << "Size:         " << toString(ubound - lbound) << std::endl;
