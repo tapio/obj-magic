@@ -1,0 +1,11 @@
+#!/bin/bash
+
+INFILE="$DATADIR/messy-square.obj"
+OUTFILE="$TEMPDIR/messy.obj"
+REFFILE="$DATADIR/messy-square.obj"
+
+$BIN --translate 0 --scale 1 --scaleuv 1 "$INFILE" > "$OUTFILE"
+
+cmp -s "$REFFILE" "$OUTFILE"
+exit $?
+
