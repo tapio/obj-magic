@@ -42,11 +42,11 @@
 #define GLM_VERSION_MAJOR			0
 #define GLM_VERSION_MINOR			9
 #define GLM_VERSION_PATCH			7
-#define GLM_VERSION_REVISION		0
+#define GLM_VERSION_REVISION		2
 
 #if(defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_VERSION_DISPLAYED))
 #	define GLM_MESSAGE_VERSION_DISPLAYED
-#	pragma message ("GLM: version 0.9.7.0")
+#	pragma message ("GLM: version 0.9.7.2")
 #endif//GLM_MESSAGE
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,8 @@
 
 #ifdef GLM_FORCE_PLATFORM_UNKNOWN
 #	define GLM_PLATFORM GLM_PLATFORM_UNKNOWN
+#elif defined(__CYGWIN__)
+#	define GLM_PLATFORM GLM_PLATFORM_CYGWIN
 #elif defined(__QNXNTO__)
 #	define GLM_PLATFORM GLM_PLATFORM_QNXNTO
 #elif defined(__APPLE__)
@@ -367,6 +369,114 @@
 #endif//GLM_MESSAGE
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Platform
+
+// User defines: GLM_FORCE_PURE GLM_FORCE_SSE2 GLM_FORCE_SSE3 GLM_FORCE_AVX GLM_FORCE_AVX2
+
+#define GLM_ARCH_PURE		0x0000
+#define GLM_ARCH_ARM		0x0001
+#define GLM_ARCH_X86		0x0002
+#define GLM_ARCH_SSE2		0x0004
+#define GLM_ARCH_SSE3		0x0008
+#define GLM_ARCH_SSE4		0x0010
+#define GLM_ARCH_AVX		0x0020
+#define GLM_ARCH_AVX2		0x0040
+
+#if defined(GLM_FORCE_PURE)
+#	define GLM_ARCH GLM_ARCH_PURE
+#elif defined(GLM_FORCE_AVX2)
+#	define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#elif defined(GLM_FORCE_AVX)
+#	define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#elif defined(GLM_FORCE_SSE4)
+#	define GLM_ARCH (GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#elif defined(GLM_FORCE_SSE3)
+#	define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#elif defined(GLM_FORCE_SSE2)
+#	define GLM_ARCH (GLM_ARCH_SSE2)
+#elif (GLM_COMPILER & (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM | GLM_COMPILER_GCC)) || ((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_PLATFORM & GLM_PLATFORM_LINUX))
+#	if defined(__AVX2__)
+#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__AVX__)
+#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__SSE3__)
+#		define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__SSE2__)
+#		define GLM_ARCH (GLM_ARCH_SSE2)
+#	else
+#		define GLM_ARCH GLM_ARCH_PURE
+#	endif
+#elif (GLM_COMPILER & GLM_COMPILER_VC) || ((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_PLATFORM & GLM_PLATFORM_WINDOWS))
+#	if defined(_M_ARM_FP)
+#		define GLM_ARCH (GLM_ARCH_ARM)
+#	elif defined(__AVX2__)
+#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__AVX__)
+#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif _M_IX86_FP == 2
+#		define GLM_ARCH (GLM_ARCH_SSE2)
+#	else
+#		define GLM_ARCH (GLM_ARCH_PURE)
+#	endif
+#elif (GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))
+#	if defined(__AVX2__)
+#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__AVX__)
+#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__SSE4_1__ )
+#		define GLM_ARCH (GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__SSE3__)
+#		define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
+#	elif defined(__SSE2__)
+#		define GLM_ARCH (GLM_ARCH_SSE2)
+#	else
+#		define GLM_ARCH (GLM_ARCH_PURE)
+#	endif
+#else
+#	define GLM_ARCH GLM_ARCH_PURE
+#endif
+
+// With MinGW-W64, including intrinsic headers before intrin.h will produce some errors. The problem is
+// that windows.h (and maybe other headers) will silently include intrin.h, which of course causes problems.
+// To fix, we just explicitly include intrin.h here.
+#if defined(__MINGW64__) && (GLM_ARCH != GLM_ARCH_PURE)
+#	include <intrin.h>
+#endif
+
+#if GLM_ARCH & GLM_ARCH_AVX2
+#	include <immintrin.h>
+#endif//GLM_ARCH
+#if GLM_ARCH & GLM_ARCH_AVX
+#	include <immintrin.h>
+#endif//GLM_ARCH
+#if GLM_ARCH & GLM_ARCH_SSE4
+#	include <smmintrin.h>
+#endif//GLM_ARCH
+#if GLM_ARCH & GLM_ARCH_SSE3
+#	include <pmmintrin.h>
+#endif//GLM_ARCH
+#if GLM_ARCH & GLM_ARCH_SSE2
+#	include <emmintrin.h>
+#endif//GLM_ARCH
+
+#if defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_ARCH_DISPLAYED)
+#	define GLM_MESSAGE_ARCH_DISPLAYED
+#	if(GLM_ARCH == GLM_ARCH_PURE)
+#		pragma message("GLM: Platform independent code")
+#	elif(GLM_ARCH & GLM_ARCH_ARM)
+#		pragma message("GLM: ARM instruction set")
+#	elif(GLM_ARCH & GLM_ARCH_AVX2)
+#		pragma message("GLM: AVX2 instruction set")
+#	elif(GLM_ARCH & GLM_ARCH_AVX)
+#		pragma message("GLM: AVX instruction set")
+#	elif(GLM_ARCH & GLM_ARCH_SSE3)
+#		pragma message("GLM: SSE3 instruction set")
+#	elif(GLM_ARCH & GLM_ARCH_SSE2)
+#		pragma message("GLM: SSE2 instruction set")
+#	endif//GLM_ARCH
+#endif//GLM_MESSAGE
+
+///////////////////////////////////////////////////////////////////////////////////
 // C++ Version
 
 // User defines: GLM_FORCE_CXX98, GLM_FORCE_CXX03, GLM_FORCE_CXX11, GLM_FORCE_CXX14
@@ -462,29 +572,20 @@
 #		endif
 #	elif GLM_COMPILER & GLM_COMPILER_INTEL
 #		ifdef _MSC_EXTENSIONS
-#			if __cplusplus >= 201402L
-#				define GLM_LANG (GLM_LANG_CXX14 | GLM_LANG_CXXMS_FLAG)
-#			elif __cplusplus >= 201103L
-#				define GLM_LANG (GLM_LANG_CXX11 | GLM_LANG_CXXMS_FLAG)
-#			elif GLM_COMPILER >= GLM_COMPILER_INTEL13
-#				define GLM_LANG (GLM_LANG_CXX0X | GLM_LANG_CXXMS_FLAG)
-#			elif __cplusplus >= 199711L
-#				define GLM_LANG (GLM_LANG_CXX98 | GLM_LANG_CXXMS_FLAG)
-#			else
-#				define GLM_LANG (GLM_LANG_CXX | GLM_LANG_CXXMS_FLAG)
-#			endif
+#			define GLM_MSC_EXT GLM_LANG_CXXMS_FLAG
 #		else
-#			if __cplusplus >= 201402L
-#				define GLM_LANG (GLM_LANG_CXX14 | GLM_LANG_CXXMS_FLAG)
-#			elif __cplusplus >= 201103L
-#				define GLM_LANG (GLM_LANG_CXX11 | GLM_LANG_CXXMS_FLAG)
-#			elif GLM_COMPILER >= GLM_COMPILER_INTEL13
-#				define GLM_LANG (GLM_LANG_CXX0X | GLM_LANG_CXXMS_FLAG)
-#			elif __cplusplus >= 199711L
-#				define GLM_LANG (GLM_LANG_CXX98 | GLM_LANG_CXXMS_FLAG)
-#			else
-#				define GLM_LANG (GLM_LANG_CXX | GLM_LANG_CXXMS_FLAG)
-#			endif
+#			define GLM_MSC_EXT 0
+#		endif
+#		if __cplusplus >= 201402L
+#			define GLM_LANG (GLM_LANG_CXX14 | GLM_MSC_EXT)
+#		elif __cplusplus >= 201103L
+#			define GLM_LANG (GLM_LANG_CXX11 | GLM_MSC_EXT)
+#		elif __INTEL_CXX11_MODE__
+#			define GLM_LANG (GLM_LANG_CXX0X | GLM_MSC_EXT)
+#		elif __cplusplus >= 199711L
+#			define GLM_LANG (GLM_LANG_CXX98 | GLM_MSC_EXT)
+#		else
+#			define GLM_LANG (GLM_LANG_CXX | GLM_MSC_EXT)
 #		endif
 #	else // Unkown compiler
 #		if __cplusplus >= 201402L
@@ -535,7 +636,7 @@
 // http://gcc.gnu.org/projects/cxx0x.html
 // http://msdn.microsoft.com/en-us/library/vstudio/hh567368(v=vs.120).aspx
 
-#if GLM_PLATFORM == GLM_PLATFORM_ANDROID
+#if GLM_PLATFORM == GLM_PLATFORM_ANDROID || GLM_PLATFORM == GLM_PLATFORM_CYGWIN
 #	define GLM_HAS_CXX11_STL 0
 #elif GLM_COMPILER & (GLM_COMPILER_LLVM | GLM_COMPILER_APPLE_CLANG)
 #	if __has_include(<__config>) // libc++
@@ -561,9 +662,9 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_STATIC_ASSERT 1
 #else
-#	define GLM_HAS_STATIC_ASSERT (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_STATIC_ASSERT ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC43)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2010)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2010))))
 #endif
 
 // N1988
@@ -585,9 +686,9 @@
 #	define GLM_HAS_CONSTEXPR 1
 #	define GLM_HAS_CONSTEXPR_PARTIAL GLM_HAS_CONSTEXPR
 #else
-#	define GLM_HAS_CONSTEXPR (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
-		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC46)))
-#	define GLM_HAS_CONSTEXPR_PARTIAL GLM_HAS_CONSTEXPR || ((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2015))
+#	define GLM_HAS_CONSTEXPR ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC46))))
+#	define GLM_HAS_CONSTEXPR_PARTIAL (GLM_HAS_CONSTEXPR || ((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2015)))
 #endif
 
 // N2672
@@ -596,9 +697,9 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_INITIALIZER_LISTS 1
 #else
-#	define GLM_HAS_INITIALIZER_LISTS (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_INITIALIZER_LISTS ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC44)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013))))
 #endif
 
 // N2544 Unrestricted unions
@@ -617,10 +718,10 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_DEFAULTED_FUNCTIONS 1
 #else
-#	define GLM_HAS_DEFAULTED_FUNCTIONS (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_DEFAULTED_FUNCTIONS ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC44)) || \
 		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013)) || \
-		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL12)))
+		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL12))))
 #endif
 
 // N2118
@@ -629,9 +730,9 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_RVALUE_REFERENCES 1
 #else
-#	define GLM_HAS_RVALUE_REFERENCES (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_RVALUE_REFERENCES ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC43)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2012)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2012))))
 #endif
 
 // N2437 http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
@@ -640,10 +741,10 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_EXPLICIT_CONVERSION_OPERATORS 1
 #else
-#	define GLM_HAS_EXPLICIT_CONVERSION_OPERATORS (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_EXPLICIT_CONVERSION_OPERATORS ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC45)) || \
 		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL14)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013))))
 #endif
 
 // N2258 http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf
@@ -652,10 +753,10 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_TEMPLATE_ALIASES 1
 #else
-#	define GLM_HAS_TEMPLATE_ALIASES (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_TEMPLATE_ALIASES ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL12_1)) || \
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC47)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013))))
 #endif
 
 // N2930 http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2930.html
@@ -664,18 +765,18 @@
 #elif GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_RANGE_FOR 1
 #else
-#	define GLM_HAS_RANGE_FOR (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+#	define GLM_HAS_RANGE_FOR ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC46)) || \
 		((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_COMPILER >= GLM_COMPILER_INTEL13)) || \
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2012)))
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2012))))
 #endif
 
 //
 #if GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_ASSIGNABLE 1
 #else
-#	define GLM_HAS_ASSIGNABLE (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
-		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC49)))
+#	define GLM_HAS_ASSIGNABLE ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+		((GLM_COMPILER & GLM_COMPILER_GCC) && (GLM_COMPILER >= GLM_COMPILER_GCC49))))
 #endif
 
 //
@@ -685,16 +786,15 @@
 #if GLM_LANG & GLM_LANG_CXX11_FLAG
 #	define GLM_HAS_MAKE_SIGNED 1
 #else
-#	define GLM_HAS_MAKE_SIGNED (GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
-		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013)))
+#	define GLM_HAS_MAKE_SIGNED ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
+		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC2013))))
 #endif
 
-//
 #if GLM_ARCH == GLM_ARCH_PURE
 #	define GLM_HAS_BITSCAN_WINDOWS 0
 #else
-#	define GLM_HAS_BITSCAN_WINDOWS (GLM_PLATFORM & GLM_PLATFORM_WINDOWS) && (\
-		(GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_LLVM | GLM_COMPILER_INTEL))
+#	define GLM_HAS_BITSCAN_WINDOWS ((GLM_PLATFORM & GLM_PLATFORM_WINDOWS) && (\
+		(GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_LLVM | GLM_COMPILER_INTEL))))
 #endif
 
 // OpenMP
@@ -718,121 +818,6 @@
 
 // Not standard
 #define GLM_HAS_ANONYMOUS_UNION (GLM_LANG & GLM_LANG_CXXMS_FLAG)
-
-///////////////////////////////////////////////////////////////////////////////////
-// Platform
-
-// User defines: GLM_FORCE_PURE GLM_FORCE_SSE2 GLM_FORCE_SSE3 GLM_FORCE_AVX GLM_FORCE_AVX2
-
-#define GLM_ARCH_PURE		0x0000
-#define GLM_ARCH_ARM		0x0001
-#define GLM_ARCH_X86		0x0002
-#define GLM_ARCH_SSE2		0x0004
-#define GLM_ARCH_SSE3		0x0008
-#define GLM_ARCH_SSE4		0x0010
-#define GLM_ARCH_AVX		0x0020
-#define GLM_ARCH_AVX2		0x0040
-
-#if defined(GLM_FORCE_PURE)
-#	define GLM_ARCH GLM_ARCH_PURE
-#elif defined(GLM_FORCE_AVX2)
-#	define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#elif defined(GLM_FORCE_AVX)
-#	define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#elif defined(GLM_FORCE_SSE4)
-#	define GLM_ARCH (GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#elif defined(GLM_FORCE_SSE3)
-#	define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#elif defined(GLM_FORCE_SSE2)
-#	define GLM_ARCH (GLM_ARCH_SSE2)
-#elif (GLM_COMPILER & (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM | GLM_COMPILER_GCC)) || ((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_PLATFORM & GLM_PLATFORM_LINUX))
-#	if(__AVX2__)
-#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif(__AVX__)
-#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif(__SSE3__)
-#		define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif(__SSE2__)
-#		define GLM_ARCH (GLM_ARCH_SSE2)
-#	else
-#		define GLM_ARCH GLM_ARCH_PURE
-#	endif
-#elif (GLM_COMPILER & GLM_COMPILER_VC) || ((GLM_COMPILER & GLM_COMPILER_INTEL) && (GLM_PLATFORM & GLM_PLATFORM_WINDOWS))
-#	if defined(_M_ARM_FP)
-#		define GLM_ARCH (GLM_ARCH_ARM)
-#	elif defined(__AVX2__)
-#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif defined(__AVX__)
-#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif _M_IX86_FP == 2
-#		define GLM_ARCH (GLM_ARCH_SSE2)
-#	else
-#		define GLM_ARCH (GLM_ARCH_PURE)
-#	endif
-#elif (GLM_COMPILER & GLM_COMPILER_GCC) && (defined(__i386__) || defined(__x86_64__))
-#	if defined(__AVX2__)
-#		define GLM_ARCH (GLM_ARCH_AVX2 | GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif defined(__AVX__)
-#		define GLM_ARCH (GLM_ARCH_AVX | GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif defined(__SSE4_1__ )
-#		define GLM_ARCH (GLM_ARCH_SSE4 | GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif defined(__SSE3__)
-#		define GLM_ARCH (GLM_ARCH_SSE3 | GLM_ARCH_SSE2)
-#	elif defined(__SSE2__)
-#		define GLM_ARCH (GLM_ARCH_SSE2)
-#	else
-#		define GLM_ARCH (GLM_ARCH_PURE)
-#	endif
-#else
-#	define GLM_ARCH GLM_ARCH_PURE
-#endif
-
-// With MinGW-W64, including intrinsic headers before intrin.h will produce some errors. The problem is
-// that windows.h (and maybe other headers) will silently include intrin.h, which of course causes problems.
-// To fix, we just explicitly include intrin.h here.
-#if defined(__MINGW64__) && (GLM_ARCH != GLM_ARCH_PURE)
-#	include <intrin.h>
-#endif
-
-#if GLM_ARCH & GLM_ARCH_AVX2
-#	include <immintrin.h>
-#endif//GLM_ARCH
-#if GLM_ARCH & GLM_ARCH_AVX
-#	include <immintrin.h>
-#endif//GLM_ARCH
-#if GLM_ARCH & GLM_ARCH_SSE4
-#	include <smmintrin.h>
-#endif//GLM_ARCH
-#if GLM_ARCH & GLM_ARCH_SSE3
-#	include <pmmintrin.h>
-#endif//GLM_ARCH
-#if GLM_ARCH & GLM_ARCH_SSE2
-#	include <emmintrin.h>
-#	if(GLM_COMPILER == GLM_COMPILER_VC2005) // VC2005 is missing some intrinsics, workaround
-		inline float _mm_cvtss_f32(__m128 A) { return A.m128_f32[0]; }
-		inline __m128 _mm_castpd_ps(__m128d PD) { union { __m128 ps; __m128d pd; } c; c.pd = PD; return c.ps; }
-		inline __m128d _mm_castps_pd(__m128 PS) { union { __m128 ps; __m128d pd; } c; c.ps = PS; return c.pd; }
-		inline __m128i _mm_castps_si128(__m128 PS) { union { __m128 ps; __m128i pi; } c; c.ps = PS; return c.pi; }
-		inline __m128 _mm_castsi128_ps(__m128i PI) { union { __m128 ps; __m128i pi; } c; c.pi = PI; return c.ps; }
-#	endif
-#endif//GLM_ARCH
-
-#if defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_ARCH_DISPLAYED)
-#	define GLM_MESSAGE_ARCH_DISPLAYED
-#	if(GLM_ARCH == GLM_ARCH_PURE)
-#		pragma message("GLM: Platform independent code")
-#	elif(GLM_ARCH & GLM_ARCH_ARM)
-#		pragma message("GLM: ARM instruction set")
-#	elif(GLM_ARCH & GLM_ARCH_AVX2)
-#		pragma message("GLM: AVX2 instruction set")
-#	elif(GLM_ARCH & GLM_ARCH_AVX)
-#		pragma message("GLM: AVX instruction set")
-#	elif(GLM_ARCH & GLM_ARCH_SSE3)
-#		pragma message("GLM: SSE3 instruction set")
-#	elif(GLM_ARCH & GLM_ARCH_SSE2)
-#		pragma message("GLM: SSE2 instruction set")
-#	endif//GLM_ARCH
-#endif//GLM_MESSAGE
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Static assert
@@ -1012,7 +997,7 @@ namespace detail
 		}
 	}//namespace glm
 #	define GLM_COUNTOF(arr) glm::countof(arr)
-#elif _MSC_VER
+#elif defined(_MSC_VER)
 #	define GLM_COUNTOF(arr) _countof(arr)
 #else
 #	define GLM_COUNTOF(arr) sizeof(arr) / sizeof(arr[0])

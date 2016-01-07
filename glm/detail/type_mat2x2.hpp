@@ -125,7 +125,7 @@ namespace glm
 
 		// -- Unary arithmetic operators --
 
-		GLM_FUNC_DECL tmat2x2<T, P> & operator=(tmat2x2<T, P> const & v) GLM_DEFAULT;;
+		GLM_FUNC_DECL tmat2x2<T, P> & operator=(tmat2x2<T, P> const & v) GLM_DEFAULT;
 
 		template <typename U>
 		GLM_FUNC_DECL tmat2x2<T, P> & operator=(tmat2x2<U, P> const & m);
@@ -157,7 +157,10 @@ namespace glm
 	// -- Unary operators --
 
 	template <typename T, precision P>
-	GLM_FUNC_DECL tmat2x2<T, P> const operator-(tmat2x2<T, P> const & m);
+	GLM_FUNC_DECL tmat2x2<T, P> operator+(tmat2x2<T, P> const & m);
+
+	template <typename T, precision P>
+	GLM_FUNC_DECL tmat2x2<T, P> operator-(tmat2x2<T, P> const & m);
 
 	// -- Binary operators --
 
