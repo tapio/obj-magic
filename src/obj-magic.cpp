@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
@@ -14,12 +15,13 @@
 #define VERSION "v0.4"
 
 #define EPSILON 0.00001f
+#define W 12
 
 using namespace glm;
 
 std::string toString(vec3 vec) {
 	std::ostringstream oss;
-	oss << "x:" << vec.x << " y:" << vec.y << " z:" << vec.z;
+	oss << std::right << std::setw(W) << vec.x << std::setw(W) << vec.y << std::setw(W) << vec.z;
 	return oss.str();
 }
 
@@ -156,15 +158,14 @@ int main(int argc, char* argv[]) {
 		// Output info?
 		if (info) {
 			out << APPNAME << " " << VERSION << std::endl;
-			out << "Filename: " << infile << std::endl;
-			out << std::endl;
-			out << "Vertices: " << v_count << std::endl;
+			out << "Filename:  " << infile << std::endl;
+			out << "Vertices:  " << v_count << std::endl;
 			out << "TexCoords: " << vt_count << std::endl;
-			out << "Normals: " << vn_count << std::endl;
-			out << "Faces: " << f_count << std::endl;
-			out << std::endl;
-			out << "Center: " << toString((lbound + ubound) * 0.5f) << std::endl;
-			out << "Size: " << toString(ubound - lbound) << std::endl;
+			out << "Normals:   " << vn_count << std::endl;
+			out << "Faces:     " << f_count << std::endl;
+			out << "              " << std::right << std::setw(W) << "x" << std::setw(W) << "y" << std::setw(W) << "z" << std::endl;
+			out << "Center:       " << toString((lbound + ubound) * 0.5f) << std::endl;
+			out << "Size:         " << toString(ubound - lbound) << std::endl;
 			out << "Lower bounds: " << toString(lbound) << std::endl;
 			out << "Upper bounds: " << toString(ubound) << std::endl;
 			return EXIT_SUCCESS;

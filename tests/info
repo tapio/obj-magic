@@ -5,7 +5,7 @@ OUTFILE="$TEMPDIR/info.obj"
 REFFILE="$DATADIR/square-info.obj"
 
 # Need to strip the file path as it's different based on file location
-$BIN --info  "$INFILE" | tail -n +4 > "$OUTFILE"
+$BIN --info  "$INFILE" | tail -n +3 > "$OUTFILE"
 
 cmp -s "$REFFILE" "$OUTFILE"
 exit $?
