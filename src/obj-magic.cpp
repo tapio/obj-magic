@@ -13,7 +13,7 @@
 #include "args.hpp"
 
 #define APPNAME "obj-magic"
-#define VERSION "v0.4"
+#define VERSION "v0.5"
 
 #define EPSILON 0.00001f
 #define W 12
