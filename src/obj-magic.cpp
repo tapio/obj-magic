@@ -194,6 +194,14 @@ int main(int argc, char* argv[]) {
 			scale *= fitScale;
 		}
 	}
+	
+	auto outputUnmodifiedRow = [](std::ostream& out, const std::string& row) {
+		// getline stops at \n, so there might be \r hiding in there if we are reading CRLF files
+		unsigned last = row.size() - 1;
+		if (last >= 0 && row[last] == '\r')
+			out << row.substr(0, last) << std::endl;
+		else out << row << std::endl;
+	};
 
 	// Output pass
 	file.clear();
@@ -212,7 +220,7 @@ int main(int argc, char* argv[]) {
 			in += translate;
 			if (old != in)
 				out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
-			else out << row << std::endl;
+			else outputUnmodifiedRow(out, row);
 		} else if (row.substr(0,3) == "vt ") {  // Tex coords
 			srow >> tempst >> in.x >> in.y;
 			vec3 old = in;
@@ -222,7 +230,7 @@ int main(int argc, char* argv[]) {
 			in.y *= scaleUv.y;
 			if (old != in)
 				out << "vt " << in.x << " " << in.y << std::endl;
-			else out << row << std::endl;
+			else outputUnmodifiedRow(out, row);
 		} else if (row.substr(0,3) == "vn ") {  // Normals
 			srow >> tempst >> in.x >> in.y >> in.z;
 			vec3 old = in;
@@ -230,9 +238,9 @@ int main(int argc, char* argv[]) {
 			if (normalize_normals) in = normalize(in);
 			if (old != in)
 				out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
-			else out << row << std::endl;
+			else outputUnmodifiedRow(out, row);
 		} else {
-			out << row << std::endl;
+			outputUnmodifiedRow(out, row);
 		}
 	}
 
