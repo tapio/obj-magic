@@ -1,7 +1,7 @@
 #!/bin/sh
 
 EXENAME="obj-magic"
-CFLAGS="-O2 -Wall -Wextra -Wno-unused-parameter"
+CFLAGS="-O2 -std=c++14 -Wall -Wextra -Wno-unused-parameter"
 
 if [ "x$CXX" = "x" ]; then
 	# Default to GCC
