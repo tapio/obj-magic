@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
 	
 	auto outputUnmodifiedRow = [](std::ostream& out, const std::string& row) {
 		// getline stops at \n, so there might be \r hiding in there if we are reading CRLF files
-		unsigned last = row.size() - 1;
+		int last = row.size() - 1;
 		if (last >= 0 && row[last] == '\r')
 			out << row.substr(0, last) << std::endl;
 		else out << row << std::endl;
