@@ -36,7 +36,7 @@ public:
 					}
 				}
 			} else if (arg[0] != '-') {
-				globalopts.insert(arg);
+				globalopts.push_back(arg);
 				allopts.push_back(arg);
 			}
 		}
@@ -64,7 +64,7 @@ public:
 		return default_arg;
 	}
 
-	const std::set<std::string>& orphans() const { return globalopts; }
+	const std::vector<std::string>& orphans() const { return globalopts; }
 
 	std::string app() const { return app_name; }
 
@@ -73,7 +73,7 @@ private:
 	std::vector<std::string> allopts;
 	std::set<char> shortopts;
 	std::set<std::string> longopts;
-	std::set<std::string> globalopts;
+	std::vector<std::string> globalopts;
 };
 
 

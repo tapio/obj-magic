@@ -40,11 +40,11 @@ int main(int argc, char* argv[]) {
 		return EXIT_SUCCESS;
 	}
 	if (args.opt('h', "help") || argc < 3) {
-		std::cerr << "Usage: " << args.app() << " PARAM [PARAM...] FILE" << std::endl;
+		std::cerr << "Usage: " << args.app() << " PARAM [PARAM...] FILE [FILE...]" << std::endl;
 		std::cerr << "Parameters:" << std::endl;
 		std::cerr << " -h   --help                    print this help and exit" << std::endl;
 		std::cerr << " -v   --version                 print version and exit" << std::endl;
-		std::cerr << " -o   --out FILE                put output to FILE instead of stdout" << std::endl;
+		std::cerr << " -o   --out FILE                put output to FILE instead of stdout (if 1 input given)" << std::endl;
 		std::cerr << " -O   --overwrite               edit input file directly, overwriting it" << std::endl;
 		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
 		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
@@ -59,6 +59,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "      --fit[xyz] AMOUNT         uniformly scale to fit AMOUNT in dimension" << std::endl;
 		std::cerr << "      --resize[xyz] AMOUNT      non-uniformly scale to fit AMOUNT in dimension" << std::endl;
 		std::cerr << std::endl;
+		std::cerr << "Multiple input files will force --overwrite mode." << std::endl;
 		std::cerr << "[xyz] - long option suffixed with x, y or z operates only on that axis." << std::endl;
 		std::cerr << "No suffix (or short form) assumes all axes." << std::endl;
 		std::cerr << "Example: " << args.app() << " --scale 0.5 model.obj" << std::endl;
@@ -71,12 +72,23 @@ int main(int argc, char* argv[]) {
 	vec3 normal_scale = args.opt(' ', "invert-normals") ? vec3(-1.0f) : vec3(1.0);
 
 	// Output stream handling
-	std::string infile = argv[argc-1];
+	std::vector<std::string> files = args.orphans();
+	auto removed_files_it = std::remove_if(files.begin(), files.end(), [](const std::string& file) { return file.find(".obj") == std::string::npos; });
+	files.erase(removed_files_it, files.end());
+	if (files.empty()) {
+		std::cerr << "Need at least one input file!" << std::endl;
+		return EXIT_FAILURE;
+	}
 	std::string outfile = args.arg<std::string>('o', "out");
 	std::ofstream fout;
-	std::stringstream sout;
 	bool inPlaceOutput = false;
-	if (outfile == infile || args.opt('O', "overwrite")) { // In-place
+	if (files.size() > 1) {
+		inPlaceOutput = !info;
+		if (!outfile.empty()) {
+			std::cerr << "Can't use -o / --out option with multiple input files." << std::endl;
+			return EXIT_FAILURE;
+		}
+	} else if (outfile == files[0] || args.opt('O', "overwrite")) { // In-place
 		inPlaceOutput = true;
 	} else if (!outfile.empty()) {
 		fout.open(outfile.c_str());
@@ -85,7 +97,6 @@ int main(int argc, char* argv[]) {
 			return EXIT_FAILURE;
 		}
 	}
-	std::ostream& out = inPlaceOutput ? sout : (outfile.empty() ? std::cout : fout);
 
 	vec3 scale(args.arg('s', "scale", 1.0f));
 	scale.x *= args.arg(' ', "scalex", 1.0f);
@@ -140,134 +151,145 @@ int main(int argc, char* argv[]) {
 	if (rotangles.z != 0.0f) temprot = rotate(temprot, rotangles.z, vec3(0,0,1));
 	mat3 rotation(temprot);
 
-	std::ifstream file(infile.c_str(), std::ios::binary);
-	if (!file.is_open()) {
-		std::cerr << "Failed to open file " << infile << std::endl;
-		return EXIT_FAILURE;
-	}
+	bool infoHeaderDone = false;
+	for (const std::string& infile : files) {
+		std::stringstream sout;
+		std::ifstream file(infile.c_str(), std::ios::binary);
+		std::ostream& out = inPlaceOutput ? sout : (outfile.empty() ? std::cout : fout);
 
-	std::string row;
-	// Analyzing pass
-	bool analyze = info || (center.length() > 0.0f) || (fit.length() > 0.0f) || (resize.length() > 0.0f);
-	if (analyze) {
-		vec3 lbound(std::numeric_limits<float>::max());
-		vec3 ubound(-std::numeric_limits<float>::max());
-		std::map<std::string, unsigned> materials;
-		unsigned long long v_count = 0, vt_count = 0, vn_count = 0, f_count = 0, p_count = 0, l_count = 0, o_count = 0;
+		if (!file.is_open()) {
+			std::cerr << "Failed to open file " << infile << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		std::string row;
+		// Analyzing pass
+		bool analyze = info || (center.length() > 0.0f) || (fit.length() > 0.0f) || (resize.length() > 0.0f);
+		if (analyze) {
+			vec3 lbound(std::numeric_limits<float>::max());
+			vec3 ubound(-std::numeric_limits<float>::max());
+			std::map<std::string, unsigned> materials;
+			unsigned long long v_count = 0, vt_count = 0, vn_count = 0, f_count = 0, p_count = 0, l_count = 0, o_count = 0;
+			while (getline(file, row)) {
+				std::istringstream srow(row);
+				vec3 in;
+				std::string tempst;
+				if (row.substr(0,2) == "v ") {  // Vertices
+					srow >> tempst >> in.x >> in.y >> in.z;
+					lbound = min(in, lbound);
+					ubound = max(in, ubound);
+					++v_count;
+				}
+				else if (row.substr(0,3) == "vt ") ++vt_count;
+				else if (row.substr(0,3) == "vn ") ++vn_count;
+				else if (row.substr(0,2) == "p ") ++p_count;
+				else if (row.substr(0,2) == "l ") ++l_count;
+				else if (row.substr(0,2) == "f ") ++f_count;
+				else if (row.substr(0,2) == "o ") ++o_count;
+				else if (row.substr(0,7) == "usemtl ") materials[row.substr(7)]++;
+			}
+			center *= (lbound + ubound) * 0.5f;
+			// Output info?
+			if (info) {
+				if (!infoHeaderDone) {
+					out << APPNAME << " " << VERSION << std::endl;
+					infoHeaderDone = true;
+				} else out << std::endl;
+				out << std::endl;
+				out << "Filename:      " << infile << std::endl;
+				out << "Vertices:      " << v_count << std::endl;
+				out << "TexCoords:     " << vt_count << std::endl;
+				out << "Normals:       " << vn_count << std::endl;
+				out << "Faces:         " << f_count << std::endl;
+				out << "Points:        " << p_count << std::endl;
+				out << "Lines:         " << l_count << std::endl;
+				out << "Named objects: " << o_count << std::endl;
+				out << "Materials:     " << materials.size() << std::endl;
+				out << "              " << std::right << std::setw(W) << "x" << std::setw(W) << "y" << std::setw(W) << "z" << std::endl;
+				out << "Center:       " << toString((lbound + ubound) * 0.5f) << std::endl;
+				out << "Size:         " << toString(ubound - lbound) << std::endl;
+				out << "Lower bounds: " << toString(lbound) << std::endl;
+				out << "Upper bounds: " << toString(ubound) << std::endl;
+				continue;
+			}
+			if (fit.length()) {
+				vec3 size = ubound - lbound;
+				float fitScale = 1.f;
+				if (args.arg(' ', "fit", 0.f)) fitScale = args.arg(' ', "fit", 0.f) / compMax(size);
+				else if (fit.x) fitScale = fit.x / size.x;
+				else if (fit.y) fitScale = fit.y / size.y;
+				else if (fit.z) fitScale = fit.z / size.z;
+				scale *= fitScale;
+			}
+			if (resize.length()) {
+				vec3 size = ubound - lbound;
+				vec3 resizeScale(1, 1, 1);
+				if (resize.x) resizeScale.x = resize.x / size.x;
+				if (resize.y) resizeScale.y = resize.y / size.y;
+				if (resize.z) resizeScale.z = resize.z / size.z;
+				scale *= resizeScale;
+			}
+		}
+	
+		auto outputUnmodifiedRow = [](std::ostream& out, const std::string& row) {
+			// getline stops at \n, so there might be \r hiding in there if we are reading CRLF files
+			int last = row.size() - 1;
+			if (last >= 0 && row[last] == '\r')
+				out << row.substr(0, last) << std::endl;
+			else out << row << std::endl;
+		};
+
+		// Output pass
+		file.clear();
+		file.seekg(0, std::ios::beg);
 		while (getline(file, row)) {
 			std::istringstream srow(row);
 			vec3 in;
 			std::string tempst;
 			if (row.substr(0,2) == "v ") {  // Vertices
 				srow >> tempst >> in.x >> in.y >> in.z;
-				lbound = min(in, lbound);
-				ubound = max(in, ubound);
-				++v_count;
+				vec3 old = in;
+				in -= center;
+				in *= mirror;
+				in *= scale;
+				in = rotation * in;
+				in += translate;
+				if (old != in)
+					out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
+				else outputUnmodifiedRow(out, row);
+			} else if (row.substr(0,3) == "vt ") {  // Tex coords
+				srow >> tempst >> in.x >> in.y;
+				vec3 old = in;
+				if (flipUvX) in.x = 1.0f - in.x;
+				if (flipUvY) in.y = 1.0f - in.y;
+				in.x *= scaleUv.x;
+				in.y *= scaleUv.y;
+				if (old != in)
+					out << "vt " << in.x << " " << in.y << std::endl;
+				else outputUnmodifiedRow(out, row);
+			} else if (row.substr(0,3) == "vn ") {  // Normals
+				srow >> tempst >> in.x >> in.y >> in.z;
+				vec3 old = in;
+				in *= normal_scale;
+				if (normalize_normals) in = normalize(in);
+				if (old != in)
+					out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
+				else outputUnmodifiedRow(out, row);
+			} else {
+				outputUnmodifiedRow(out, row);
 			}
-			else if (row.substr(0,3) == "vt ") ++vt_count;
-			else if (row.substr(0,3) == "vn ") ++vn_count;
-			else if (row.substr(0,2) == "p ") ++p_count;
-			else if (row.substr(0,2) == "l ") ++l_count;
-			else if (row.substr(0,2) == "f ") ++f_count;
-			else if (row.substr(0,2) == "o ") ++o_count;
-			else if (row.substr(0,7) == "usemtl ") materials[row.substr(7)]++;
 		}
-		center *= (lbound + ubound) * 0.5f;
-		// Output info?
-		if (info) {
-			out << APPNAME << " " << VERSION << std::endl;
-			out << "Filename:      " << infile << std::endl;
-			out << "Vertices:      " << v_count << std::endl;
-			out << "TexCoords:     " << vt_count << std::endl;
-			out << "Normals:       " << vn_count << std::endl;
-			out << "Faces:         " << f_count << std::endl;
-			out << "Points:        " << p_count << std::endl;
-			out << "Lines:         " << l_count << std::endl;
-			out << "Named objects: " << o_count << std::endl;
-			out << "Materials:     " << materials.size() << std::endl;
-			out << "              " << std::right << std::setw(W) << "x" << std::setw(W) << "y" << std::setw(W) << "z" << std::endl;
-			out << "Center:       " << toString((lbound + ubound) * 0.5f) << std::endl;
-			out << "Size:         " << toString(ubound - lbound) << std::endl;
-			out << "Lower bounds: " << toString(lbound) << std::endl;
-			out << "Upper bounds: " << toString(ubound) << std::endl;
-			return EXIT_SUCCESS;
-		}
-		if (fit.length()) {
-			vec3 size = ubound - lbound;
-			float fitScale = 1.f;
-			if (args.arg(' ', "fit", 0.f)) fitScale = args.arg(' ', "fit", 0.f) / compMax(size);
-			else if (fit.x) fitScale = fit.x / size.x;
-			else if (fit.y) fitScale = fit.y / size.y;
-			else if (fit.z) fitScale = fit.z / size.z;
-			scale *= fitScale;
-		}
-		if (resize.length()) {
-			vec3 size = ubound - lbound;
-			vec3 resizeScale(1, 1, 1);
-			if (resize.x) resizeScale.x = resize.x / size.x;
-			if (resize.y) resizeScale.y = resize.y / size.y;
-			if (resize.z) resizeScale.z = resize.z / size.z;
-			scale *= resizeScale;
-		}
-	}
-	
-	auto outputUnmodifiedRow = [](std::ostream& out, const std::string& row) {
-		// getline stops at \n, so there might be \r hiding in there if we are reading CRLF files
-		int last = row.size() - 1;
-		if (last >= 0 && row[last] == '\r')
-			out << row.substr(0, last) << std::endl;
-		else out << row << std::endl;
-	};
 
-	// Output pass
-	file.clear();
-	file.seekg(0, std::ios::beg);
-	while (getline(file, row)) {
-		std::istringstream srow(row);
-		vec3 in;
-		std::string tempst;
-		if (row.substr(0,2) == "v ") {  // Vertices
-			srow >> tempst >> in.x >> in.y >> in.z;
-			vec3 old = in;
-			in -= center;
-			in *= mirror;
-			in *= scale;
-			in = rotation * in;
-			in += translate;
-			if (old != in)
-				out << "v " << in.x << " " << in.y << " " << in.z << std::endl;
-			else outputUnmodifiedRow(out, row);
-		} else if (row.substr(0,3) == "vt ") {  // Tex coords
-			srow >> tempst >> in.x >> in.y;
-			vec3 old = in;
-			if (flipUvX) in.x = 1.0f - in.x;
-			if (flipUvY) in.y = 1.0f - in.y;
-			in.x *= scaleUv.x;
-			in.y *= scaleUv.y;
-			if (old != in)
-				out << "vt " << in.x << " " << in.y << std::endl;
-			else outputUnmodifiedRow(out, row);
-		} else if (row.substr(0,3) == "vn ") {  // Normals
-			srow >> tempst >> in.x >> in.y >> in.z;
-			vec3 old = in;
-			in *= normal_scale;
-			if (normalize_normals) in = normalize(in);
-			if (old != in)
-				out << "vn " << in.x << " " << in.y << " " << in.z << std::endl;
-			else outputUnmodifiedRow(out, row);
-		} else {
-			outputUnmodifiedRow(out, row);
+		if (inPlaceOutput) {
+			file.close();
+			std::ofstream finplaceout;
+			finplaceout.open(infile.c_str());
+			if (finplaceout.fail()) {
+				std::cerr << "Failed to open file " << infile << " for output" << std::endl;
+				return EXIT_FAILURE;
+			}
+			finplaceout << sout.rdbuf();
 		}
-	}
-
-	if (inPlaceOutput) {
-		file.close();
-		fout.open(infile.c_str());
-		if (fout.fail()) {
-			std::cerr << "Failed to open file " << infile << " for output" << std::endl;
-			return EXIT_FAILURE;
-		}
-		fout << sout.rdbuf();
 	}
 
 	return EXIT_SUCCESS;
