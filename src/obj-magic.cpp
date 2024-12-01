@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "      --translate[xyz] AMOUNT   translate AMOUNT amount" << std::endl;
 		std::cerr << "      --rotate[xyz] AMOUNT      rotate along axis AMOUNT degrees" << std::endl;
 		std::cerr << "      --fit[xyz] AMOUNT         uniformly scale to fit AMOUNT in dimension" << std::endl;
+		std::cerr << "      --resize[xyz] AMOUNT      non-uniformly scale to fit AMOUNT in dimension" << std::endl;
 		std::cerr << std::endl;
 		std::cerr << "[xyz] - long option suffixed with x, y or z operates only on that axis." << std::endl;
 		std::cerr << "No suffix (or short form) assumes all axes." << std::endl;
@@ -122,6 +123,13 @@ int main(int argc, char* argv[]) {
 	if (args.arg(' ', "fit", 0.0f))
 		fit = vec3(args.arg(' ', "fit", 0.0f));
 
+	vec3 resize;
+	resize.x = args.arg(' ', "resizex", 0.0f);
+	resize.y = args.arg(' ', "resizey", 0.0f);
+	resize.z = args.arg(' ', "resizez", 0.0f);
+	if (args.arg(' ', "resize", 0.0f))
+		resize = vec3(args.arg(' ', "resize", 0.0f));
+
 	vec3 rotangles(args.arg(' ', "rotate", 0.0f));
 	rotangles.x += args.arg(' ', "rotatex", 0.0f);
 	rotangles.y += args.arg(' ', "rotatey", 0.0f);
@@ -140,7 +148,7 @@ int main(int argc, char* argv[]) {
 
 	std::string row;
 	// Analyzing pass
-	bool analyze = info || (center.length() > 0.0f) || (fit.length() > 0.0f);
+	bool analyze = info || (center.length() > 0.0f) || (fit.length() > 0.0f) || (resize.length() > 0.0f);
 	if (analyze) {
 		vec3 lbound(std::numeric_limits<float>::max());
 		vec3 ubound(-std::numeric_limits<float>::max());
@@ -192,6 +200,14 @@ int main(int argc, char* argv[]) {
 			else if (fit.y) fitScale = fit.y / size.y;
 			else if (fit.z) fitScale = fit.z / size.z;
 			scale *= fitScale;
+		}
+		if (resize.length()) {
+			vec3 size = ubound - lbound;
+			vec3 resizeScale(1, 1, 1);
+			if (resize.x) resizeScale.x = resize.x / size.x;
+			if (resize.y) resizeScale.y = resize.y / size.y;
+			if (resize.z) resizeScale.z = resize.z / size.z;
+			scale *= resizeScale;
 		}
 	}
 	
