@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << " -O   --overwrite               edit input file directly, overwriting it" << std::endl;
 		std::cerr << " -i   --info                    print info about the object and exit" << std::endl;
 		std::cerr << " -n   --normalize-normals       renormalize all normals" << std::endl;
-		std::cerr << " -n   --invert-normals          invert all normals" << std::endl;
+		std::cerr << "      --invert-normals          invert all normals" << std::endl;
 		std::cerr << " -c   --center[xyz]             center object" << std::endl;
 		std::cerr << " -s   --scale[xyz] SCALE        scale object SCALE amount" << std::endl;
 		std::cerr << "      --scaleuv[xy] SCALE       multiply texture coords by SCALE amount" << std::endl;
@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
 
 		std::string row;
 		// Analyzing pass
-		bool analyze = info || (center.length() > 0.0f) || (fit.length() > 0.0f) || (resize.length() > 0.0f);
+		bool analyze = info || length(center) > 0.0f || length(fit) > 0.0f || length(resize) > 0.0f;
 		if (analyze) {
 			vec3 lbound(std::numeric_limits<float>::max());
 			vec3 ubound(-std::numeric_limits<float>::max());
