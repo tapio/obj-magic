@@ -146,9 +146,9 @@ int main(int argc, char* argv[]) {
 	rotangles.y += args.arg(' ', "rotatey", 0.0f);
 	rotangles.z += args.arg(' ', "rotatez", 0.0f);
 	mat4 temprot(1.0f);
-	if (rotangles.x != 0.0f) temprot = rotate(temprot, rotangles.x, vec3(1,0,0));
-	if (rotangles.y != 0.0f) temprot = rotate(temprot, rotangles.y, vec3(0,1,0));
-	if (rotangles.z != 0.0f) temprot = rotate(temprot, rotangles.z, vec3(0,0,1));
+	if (rotangles.x != 0.0f) temprot = rotate(temprot, radians(rotangles.x), vec3(1,0,0));
+	if (rotangles.y != 0.0f) temprot = rotate(temprot, radians(rotangles.y), vec3(0,1,0));
+	if (rotangles.z != 0.0f) temprot = rotate(temprot, radians(rotangles.z), vec3(0,0,1));
 	mat3 rotation(temprot);
 
 	bool infoHeaderDone = false;
